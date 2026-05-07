@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações | SMART TRIAGE</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            --primary: #2563eb;
+            --secondary: #0f172a;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: 280px; background-color: var(--secondary); color: white; 
+            padding: 30px 20px; display: flex; flex-direction: column; 
+            height: 100vh; position: fixed; z-index: 100;
+        }
+        .sidebar h2 { 
+            font-size: 20px; font-weight: 800; margin-bottom: 50px; 
+            display: flex; align-items: center; gap: 12px; padding-left: 10px;
+        }
+        .sidebar h2 i { background: var(--brand-gradient); padding: 8px; border-radius: 10px; color: white; }
+        .sidebar h2 span { color: #38bdf8; }
+        
+        .nav-item { 
+            padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; 
+            transition: var(--transition); display: flex; align-items: center; gap: 12px; 
+            color: #94a3b8; text-decoration: none; font-weight: 600;
+        }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: white; transform: translateX(8px); }
+        .nav-item.active { background: var(--brand-gradient); color: white; box-shadow: 0 10px 15px rgba(37, 99, 235, 0.3); }
+
+        /* --- CONTEÚDO --- */
+        .main-content { flex: 1; padding: 40px; margin-left: 280px; max-width: 1100px; }
+        
+        .header { margin-bottom: 40px; }
+        .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+        .header p { color: var(--text-muted); font-weight: 500; }
+
+        /* Seções de Configuração */
+        .settings-container { display: flex; flex-direction: column; gap: 25px; }
+        
+        .settings-card { 
+            background: white; border-radius: var(--radius-lg); border: 1px solid var(--border); 
+            padding: 30px; box-shadow: var(--shadow); transition: var(--transition);
+        }
+        .settings-card:hover { border-color: #cbd5e1; }
+
+        .section-header { 
+            display: flex; align-items: center; gap: 15px; margin-bottom: 30px; 
+            padding-bottom: 20px; border-bottom: 1px solid #f1f5f9; 
+        }
+        .section-header i { 
+            background: #eff6ff; color: var(--primary); padding: 10px; border-radius: 10px; 
+        }
+        .section-header h3 { font-size: 18px; font-weight: 800; color: var(--secondary); }
+
+        /* Formulários */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        
+        label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input, select { 
+            padding: 14px; border-radius: var(--radius-md); border: 1.5px solid var(--border); 
+            outline: none; transition: var(--transition); font-size: 14px; font-weight: 600;
+            background-color: #fcfcfd;
+        }
+        input:focus, select:focus { 
+            border-color: var(--primary); background: white;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); 
+        }
+
+        /* Toggles Modernos */
+        .control-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 0; border-bottom: 1px dashed #f1f5f9; 
+        }
+        .control-row:last-child { border-bottom: none; }
+        .control-info h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+        .control-info p { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { 
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; 
+            background-color: #e2e8f0; transition: .4s; border-radius: 34px; 
+        }
+        .slider:before { 
+            position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; 
+            background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input:checked + .slider { background: var(--brand-gradient); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* Rodapé de Ações */
+        .footer-actions { 
+            display: flex; justify-content: flex-end; gap: 15px; 
+            margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border);
+        }
+        .btn { 
+            padding: 14px 28px; border-radius: var(--radius-md); font-weight: 700; 
+            cursor: pointer; transition: var(--transition); border: none; font-size: 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-secondary { background: white; color: var(--text-muted); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #f1f5f9; color: var(--secondary); }
+        
+        .btn-primary { 
+            background: var(--brand-gradient); color: white; 
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .main-content { margin-left: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2><i data-lucide="activity"></i> <span>SMART_<b>TRIAGE</b></span></h2>
+        <nav>
+            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Visão Geral</span></a>
+            <a href="status_totens.html" class="nav-item"><i data-lucide="monitor"></i> <span>Status Totens</span></a>
+            <a href="pacientes.html" class="nav-item"><i data-lucide="users"></i> <span>Pacientes</span></a>
+            <a href="alertas.html" class="nav-item"><i data-lucide="alert-triangle"></i> <span>Alertas Ativos</span></a>
+        </nav>
+        <a href="configuracoes.html" class="nav-item active" style="margin-top: auto;">
+            <i data-lucide="settings"></i> <span>Configurações</span>
+        </a>
+    </aside>
+
+    <main class="main-content">
+        <header class="header">
+            <h1>Configurações</h1>
+            <p>Ajuste os parâmetros de performance e segurança do sistema.</p>
+        </header>
+
+        <div class="settings-container">
+            
+            <section class="settings-card">
+                <div class="section-header">
+                    <i data-lucide="shield-check"></i>
+                    <h3>Segurança & Acesso</h3>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Administrador</label>
+                        <input type="text" value="Vinícius Oliveira">
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail Corporativo</label>
+                        <input type="email" value="admin@autotriage.com.br">
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-card">
+                <div class="section-header">
+                    <i data-lucide="database"></i>
+                    <h3>Parâmetros de Rede & Totens</h3>
+                </div>
+                <div class="form-grid" style="margin-bottom: 30px;">
+                    <div class="form-group">
+                        <label>Intervalo de Polling (Segundos)</label>
+                        <select>
+                            <option>10s (Alta Precisão)</option>
+                            <option selected>30s (Recomendado)</option>
+                            <option>60s (Economia de Banda)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Alerta Crítico de Insumo (%)</label>
+                        <input type="number" value="10" min="5" max="50">
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-info">
+                        <h4>Reinicialização Remota</h4>
+                        <p>Habilita o comando de reboot via dashboard em casos de travamento.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-info">
+                        <h4>Auto-Diagnóstico</h4>
+                        <p>O sistema executa testes de ping automáticos a cada 5 minutos.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="settings-card">
+                <div class="section-header">
+                    <i data-lucide="bell-ring"></i>
+                    <h3>Notificações do Sistema</h3>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-info">
+                        <h4>Push por E-mail (Erros Críticos)</h4>
+                        <p>Notifica a equipe técnica quando um totem fica offline por > 5 min.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-row">
+                    <div class="control-info">
+                        <h4>Alertas Sonoros</h4>
+                        <p>Ativa aviso auditivo no dashboard para novos pacientes de alta prioridade.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <div class="footer-actions">
+                <button class="btn btn-secondary">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmarSalvar()">
+                    <i data-lucide="save"></i> Aplicar Alterações
+                </button>
+            </div>
+
+        </div>
+    </main>
+	
+	<section class="settings-card">
+    <div class="section-header">
+        <i data-lucide="user-circle"></i>
+        <h3>Perfil de Acesso</h3>
+    </div>
+    <div class="control-row">
+        <div class="control-info">
+            <h4>Cargo do Usuário</h4>
+            <p>Selecione seu nível de acesso para personalizar as ferramentas.</p>
+        </div>
+        <select id="perfilAcesso" onchange="salvarPerfil()">
+            <option value="admin">Administrador de TI</option>
+            <option value="medico">Médico / Assistencial</option>
+        </select>
+    </div>
+</section>
+
+    <script>
+        lucide.createIcons();
+
+        function confirmarSalvar() {
+            const btn = document.querySelector('.btn-primary');
+            const originalHTML = btn.innerHTML;
+            
+            btn.style.pointerEvents = 'none';
+            btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Processando...';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                alert("✅ Configurações salvas e replicadas para todos os terminais!");
+                btn.style.pointerEvents = 'auto';
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }, 1500);
+        }
+		//função para troca de perfil
+		function salvarPerfil() {
+			const perfil = document.getElementById('perfilAcesso').value;
+			localStorage.setItem('userProfile', perfil);
+			aplicarRestricoes();
+			
+			const msg = perfil === 'medico' ? 'Perfil Médico: Foco em pacientes e fluxo.' : 'Perfil Admin: Acesso total liberado.';
+			alert("✅ " + msg);
+		}
+
+		
+		window.onload = function() {
+			const salvo = localStorage.getItem('userProfile') || 'admin';
+			document.getElementById('perfilAcesso').value = salvo;
+		};
+		
+		//função para perfilde médico
+		
+				function aplicarRestricoes() {
+			const perfil = localStorage.getItem('userProfile');
+			
+		   
+			const menuTotens = document.querySelector('a[href="status_totens.html"]');
+			const menuAlertas = document.querySelector('a[href="alertas.html"]');
+			
+			if (perfil === 'medico') {
+				if (menuTotens) menuTotens.style.display = 'none';
+				if (menuAlertas) menuAlertas.style.display = 'none';
+			} else {
+				if (menuTotens) menuTotens.style.display = 'flex';
+				if (menuAlertas) menuAlertas.style.display = 'flex';
+			}
+		}
+
+
+document.addEventListener('DOMContentLoaded', aplicarRestricoes);
+    </script>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spin { animation: spin 1s linear infinite; }
+    </style>
+</body>
+</html>
