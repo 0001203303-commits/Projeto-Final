@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status dos Totens - TriagemDash</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --primary: #008080
+            --secondary: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { display: flex; background-color: var(--bg-light); color: #1e293b; min-height: 100vh; }
+
+        /* Menu Lateral (Mesmo padrão da index) */
+        .sidebar { width: 260px; background-color: var(--secondary); color: white; padding: 25px; display: flex; flex-direction: column; height: 100vh; position: fixed; }
+        .sidebar h2 { margin-bottom: 40px; font-size: 22px; display: flex; align-items: center; gap: 10px; }
+        .sidebar h2 span { color: var(--primary); font-weight: 800; }
+        
+        .nav-item { 
+            padding: 14px 18px; margin-bottom: 8px; border-radius: 10px; cursor: pointer; 
+            transition: 0.2s; display: flex; align-items: center; gap: 12px; color: #94a3b8;
+            text-decoration: none;
+        }
+        .nav-item:hover { background-color: #334155; color: white; }
+        .nav-item.active { background-color: var(--primary); color: white; }
+
+        /* Conteúdo */
+        .main-content { flex: 1; padding: 40px; margin-left: 260px; }
+        .header { margin-bottom: 30px; }
+        .header h1 { font-size: 26px; font-weight: 700; }
+
+        .content-box { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        /* Tabela Estilizada */
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 12px; color: #94a3b8; padding: 15px; text-transform: uppercase; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-online { background: #dcfce7; color: #166534; }
+        .badge-offline { background: #fee2e2; color: #991b1b; }
+
+        /* Gráfico */
+        .chart-container { height: 300px; width: 100%; }
+
+        /* Botão de Ação */
+        .btn-refresh { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-refresh:hover { background-color: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2><i data-lucide="activity"></i> TRIAGEM<span>DASH</span></h2>
+        <a href="index.php" class="nav-item"><i data-lucide="layout-dashboard"></i> Visão Geral</a>
+        <a href="status_totens.php" class="nav-item active"><i data-lucide="monitor"></i> Status Totens</a>
+        <a href="pacientes.php" class="nav-item"><i data-lucide="users"></i> Pacientes</a>
+        <a href="alertas.php" class="nav-item"><i data-lucide="alert-triangle"></i> Alertas Ativos</a>
+        <a href="configuracoes.php" class="nav-item" style="margin-top: auto;"><i data-lucide="settings"></i> Configurações</a>
+    </div>
+
+    <div class="main-content">
+        <div class="header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Status dos Totens</h1>
+                <p>Monitoramento técnico e nível de insumos.</p>
+            </div>
+            <button class="btn-refresh" onclick="recarregarDados()">
+                <i data-lucide="rotate-cw"></i> Atualizar Status
+            </button>
+        </div>
+
+        <div class="content-box">
+            <h3 style="margin-bottom: 15px;">Disponibilidade dos Totens (Últimas 24h)</h3>
+            <div class="chart-container">
+                <canvas id="graficoPerformanceTotem"></canvas>
+            </div>
+        </div>
+
+        <div class="content-box">
+            <h3 style="margin-bottom: 15px;">Listagem de Dispositivos</h3>
+            <table id="tabelaTotens">
+                <thead>
+                    <tr>
+                        <th>Nome do Dispositivo</th>
+                        <th>IP</th>
+                        <th>Nível de Papel</th>
+                        <th>Última Resposta</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Totem 01 - Recepção</td>
+                        <td>192.168.1.50</td>
+                        <td>85%</td>
+                        <td>Há 2 min</td>
+                        <td><span class="badge badge-online">ONLINE</span></td>
+                    </tr>
+                    <tr>
+                        <td>Totem 02 - Emergência</td>
+                        <td>192.168.1.51</td>
+                        <td>12%</td>
+                        <td>Há 1 min</td>
+                        <td><span class="badge badge-online">ONLINE</span></td>
+                    </tr>
+                    <tr>
+                        <td>Totem 04 - Corredor B</td>
+                        <td>192.168.1.53</td>
+                        <td>0%</td>
+                        <td>Há 45 min</td>
+                        <td><span class="badge badge-offline">OFFLINE</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Inicializa Ícones
+        lucide.createIcons();
+
+        // Configuração do Gráfico de Disponibilidade
+        const ctx = document.getElementById('graficoPerformanceTotem').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Totem 01', 'Totem 02', 'Totem 03', 'Totem 04'],
+                datasets: [{
+                    label: 'Uptime (%)',
+                    data: [100, 98, 100, 45], // Dados fictícios
+                    backgroundColor: ['#10b981', '#10b981', '#10b981', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, max: 100 }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Função de simulação de atualização
+        function recarregarDados() {
+            const btn = document.querySelector('.btn-refresh');
+            btn.innerHTML = '<i data-lucide="loader"></i> Atualizando...';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                alert("Dados dos totens sincronizados com sucesso!");
+                btn.innerHTML = '<i data-lucide="rotate-cw"></i> Atualizar Status';
+                lucide.createIcons();
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

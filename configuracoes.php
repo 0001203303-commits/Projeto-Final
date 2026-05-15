@@ -142,12 +142,12 @@
     <aside class="sidebar">
         <h2><i data-lucide="activity"></i> <span>SMART_<b>TRIAGE</b></span></h2>
         <nav>
-            <a href="index.html" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Visão Geral</span></a>
-            <a href="status_totens.html" class="nav-item"><i data-lucide="monitor"></i> <span>Status Totens</span></a>
-            <a href="pacientes.html" class="nav-item"><i data-lucide="users"></i> <span>Pacientes</span></a>
-            <a href="alertas.html" class="nav-item"><i data-lucide="alert-triangle"></i> <span>Alertas Ativos</span></a>
+            <a href="index.php" class="nav-item"><i data-lucide="layout-dashboard"></i> <span>Visão Geral</span></a>
+            <a href="status_totens.php" class="nav-item"><i data-lucide="monitor"></i> <span>Status Totens</span></a>
+            <a href="pacientes.php" class="nav-item"><i data-lucide="users"></i> <span>Pacientes</span></a>
+            <a href="alertas.php" class="nav-item"><i data-lucide="alert-triangle"></i> <span>Alertas Ativos</span></a>
         </nav>
-        <a href="configuracoes.html" class="nav-item active" style="margin-top: auto;">
+        <a href="configuracoes.php" class="nav-item active" style="margin-top: auto;">
             <i data-lucide="settings"></i> <span>Configurações</span>
         </a>
     </aside>
@@ -316,8 +316,8 @@
 			const perfil = localStorage.getItem('userProfile');
 			
 		   
-			const menuTotens = document.querySelector('a[href="status_totens.html"]');
-			const menuAlertas = document.querySelector('a[href="alertas.html"]');
+			const menuTotens = document.querySelector('a[href="status_totens.php"]');
+			const menuAlertas = document.querySelector('a[href="alertas.php"]');
 			
 			if (perfil === 'medico') {
 				if (menuTotens) menuTotens.style.display = 'none';
