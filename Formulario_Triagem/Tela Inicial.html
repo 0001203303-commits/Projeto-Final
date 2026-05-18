@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART TRIAGE | Atendimento</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #069494;
+            --primary-dark: #046c6c;
+            --primary-light: #e6f5f5;
+            --accent: #10b981; 
+            --bg-light: #f1f7f7;
+            --text-main: #1e293b;
+            --white: #ffffff;
+            --gray-muted: #64748b;
+            --border-color: #e2eef0;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+
+        body { 
+            background-color: var(--bg-light); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- CABEÇALHO --- */
+        .header-teal {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 35px 20px;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 25px rgba(6, 148, 148, 0.15);
+        }
+
+        .header-teal h1 {
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- WELCOME --- */
+        .welcome-bg {
+            background: radial-gradient(circle at top right, #ffffff, #e6f5f5);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .welcome-card {
+            text-align: center;
+            width: 90%;
+            max-width: 800px; 
+            background: white;
+            padding: 65px 50px; 
+            border-radius: 40px;
+            box-shadow: 0 35px 60px -15px rgba(6, 148, 148, 0.15);
+        }
+
+        .welcome-card h2 { font-size: 44px; font-weight: 800; color: var(--primary-dark); margin-bottom: 20px; }
+        .welcome-card p { font-size: 18px; color: var(--gray-muted); line-height: 1.6; margin-bottom: 45px; max-width: 550px; margin-left: auto; margin-right: auto; }
+
+        /* --- CARDS E FORMS --- */
+        .form-container { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+            overflow-y: auto;
+        }
+        
+        .card-standard {
+            background: white;
+            width: 100%;
+            max-width: 550px;
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- BARRA DE CARREGAMENTO --- */
+        .loader-container {
+            width: 100%;
+            height: 14px;
+            background: #e2eef0;
+            border-radius: 20px;
+            margin: 25px 0;
+            overflow: hidden;
+        }
+
+        .loader-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 20px;
+            transition: width 0.1s linear, background 0.4s ease;
+        }
+
+        /* --- GRID DE RESULTADOS DOS VITAIS --- */
+        .vital-grid {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 25px;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .vital-card {
+            padding: 22px 12px;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .vital-value { font-size: 26px; font-weight: 800; }
+        .vital-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- BOTÕES --- */
+        .btn-main {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 20px;
+            border: none;
+            border-radius: 18px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-main:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(6, 148, 148, 0.2);
+        }
+
+        .btn-main:active { transform: translateY(0); }
+
+        .input-group { margin-bottom: 25px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--primary-dark); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 14px; 
+            border: 2px solid var(--border-color); 
+            font-size: 16px; 
+            background-color: #f9fdfd; 
+            color: var(--text-main);
+        }
+        input:focus { outline: none; border-color: var(--primary); background-color: var(--white); }
+
+        /* --- SEÇÃO DO QUESTIONÁRIO --- */
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .btn-quiz {
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .btn-quiz:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: scale(1.02);
+        }
+
+        /* Bordas de Categorias */
+        .cat-blue { border-left: 8px solid #3b82f6; }
+        .cat-red { border-left: 8px solid #ef4444; }
+        .cat-orange { border-left: 8px solid #f97316; }
+        .cat-yellow { border-left: 8px solid #eab308; }
+        .cat-purple { border-left: 8px solid #a855f7; }
+        .cat-pink { border-left: 8px solid #ec4899; }
+
+        .result-badge {
+            padding: 20px;
+            border-radius: 16px;
+            color: white;
+            font-size: 22px;
+            font-weight: 800;
+            margin: 25px 0;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        @media print {
+            body { background: white; overflow: visible; }
+            .page { display: none !important; }
+            #page-quiz { display: flex !important; }
+            .header-teal, .btn-main, #quiz-question, .btn-quiz { display: none !important; }
+            .card-standard { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page-welcome" class="page active">
+        <div class="welcome-bg">
+            <div class="welcome-card">
+                <div style="color: var(--primary); margin-bottom: 24px;"><i data-lucide="activity" size="56"></i></div>
+                <h2>Smart Triage</h2>
+                <p>Tecnologia avançada para triagem hospitalar autônoma. Atendimento rápido, qualificado e em total conformidade técnica.</p>
+                <button class="btn-main" onclick="goToPage('page-cadastro')">
+                    INICIAR ATENDIMENTO <i data-lucide="arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-cadastro" class="page">
+        <header class="header-teal">
+            <h1><i data-lucide="user-plus"></i> IDENTIFICAÇÃO</h1>
+        </header>
+        <main class="form-container">
+            <div class="card-standard">
+                <form onsubmit="irParaColeta(event)">
+                    <div class="input-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" placeholder="Insira seu nome" required autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" required inputmode="numeric">
+                    </div>
+                    <button type="submit" class="btn-main">PRÓXIMO PASSO <i data-lucide="chevron-right"></i></button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <div id="page-vitals" class="page">
+        <header class="header-teal">
+            <h1 id="vitals-title"><i data-lucide="gauge"></i> TRIAGEM EM ANDAMENTO</h1>
+        </header>
+        <main class="form-container">
+            <div class="card-standard" style="text-align: center; min-height: 460px; display: flex; flex-direction: column; justify-content: center;">
+                
+                <div id="instruction-step">
+                    <div id="instruction-icon" style="margin-bottom: 25px; color: var(--primary);">
+                        <i data-lucide="fingerprint" size="80"></i>
+                    </div>
+                    <h2 id="instruction-text" style="font-size: 26px; color: var(--primary-dark); margin-bottom: 12px;">Aguardando...</h2>
+                    <p id="sub-instruction" style="font-size: 16px; color: var(--gray-muted); max-width: 420px; margin: 0 auto 25px; line-height: 1.5;">
+                        Estamos preparando os sensores de leitura corporal. Por favor, permaneça imóvel.
+                    </p>
+                </div>
+
+                <div class="loader-container" id="loader-bar">
+                    <div class="loader-fill" id="loader-fill"></div>
+                </div>
+
+                <div class="vital-grid" id="final-results">
+                    <div class="vital-card" style="background: #fff5f5; border: 2px solid #feb2b2;">
+                        <i data-lucide="heart" style="color: #e53e3e;"></i>
+                        <div class="vital-value" style="color: #c53030;">78</div>
+                        <div class="vital-label" style="color: #c53030;">BPM</div>
+                    </div>
+                    <div class="vital-card" style="background: #ebf8ff; border: 2px solid #90cdf4;">
+                        <i data-lucide="droplets" style="color: #3182ce;"></i>
+                        <div class="vital-value" style="color: #2b6cb0;">98%</div>
+                        <div class="vital-label" style="color: #2b6cb0;">SpO2</div>
+                    </div>
+                    <div class="vital-card" style="background: #fffaf0; border: 2px solid #fbd38d;">
+                        <i data-lucide="thermometer" style="color: #dd6b20;"></i>
+                        <div class="vital-value" style="color: #c05621;">36.5°C</div>
+                        <div class="vital-label" style="color: #c05621;">TEMP</div>
+                    </div>
+                </div>
+
+                <button id="btn-concluir" class="btn-main" style="margin-top: 35px; display: none;">
+                    AVANÇAR PARA QUESTÕES <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <div id="page-quiz" class="page">
+        <header class="header-teal">
+            <h1><i data-lucide="clipboard-list"></i> AVALIAÇÃO DE SINTOMAS</h1>
+        </header>
+        <main class="form-container">
+            <div class="card-standard" id="quiz-content" style="max-width: 800px; width: 95%;">
+                <h2 id="quiz-question" style="text-align: center; margin-bottom: 30px; color: var(--primary-dark); font-size: 24px; font-weight: 700;">
+                    O que você está sentindo?
+                </h2>
+                <div id="quiz-options" class="quiz-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function goToPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        document.getElementById('cpf').addEventListener('input', (e) => {
+            let v = e.target.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.substring(0, 11);
+            v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            e.target.value = v;
+        });
+
+        function irParaColeta(event) {
+            event.preventDefault();
+            goToPage('page-vitals');
+            iniciarFluxoColeta();
+        }
+
+        function realizarCarregamento(tempoMs, cor) {
+            return new Promise(resolve => {
+                const fill = document.getElementById('loader-fill');
+                fill.style.background = cor;
+                fill.style.width = "0%";
+                
+                let start = null;
+                function step(timestamp) {
+                    if (!start) start = timestamp;
+                    let progress = timestamp - start;
+                    let percent = Math.min((progress / tempoMs) * 100, 100);
+                    fill.style.width = percent + "%";
+                    if (progress < tempoMs) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        setTimeout(resolve, 200);
+                    }
+                }
+                window.requestAnimationFrame(step);
+            });
+        }
+
+        async function iniciarFluxoColeta() {
+            const text = document.getElementById('instruction-text');
+            const sub = document.getElementById('sub-instruction');
+            const icon = document.getElementById('instruction-icon');
+
+            icon.innerHTML = '<i data-lucide="fingerprint" size="80"></i>';
+            icon.style.color = "#3182ce";
+            text.innerText = "PASSO 1: Oximetria";
+            sub.innerText = "Insira seu dedo indicador firmemente no oxímetro acoplado ao totem e mantenha-o imóvel.";
+            lucide.createIcons();
+            await realizarCarregamento(5000, "#3182ce");
+
+            icon.innerHTML = '<i data-lucide="thermometer" size="80"></i>';
+            icon.style.color = "#dd6b20";
+            text.innerText = "PASSO 2: Temperatura Corporal";
+            sub.innerText = "Aproxime sua testa ou o seu pulso do sensor infravermelho lateral (mantenha a distância de 5cm).";
+            lucide.createIcons();
+            await realizarCarregamento(5000, "#dd6b20");
+
+            icon.innerHTML = '<i data-lucide="refresh-cw" size="80"></i>';
+            icon.style.color = "var(--primary)";
+            text.innerText = "Analisando Sinais Vitais...";
+            sub.innerText = "Aguarde enquanto estruturamos os dados aferidos.";
+            lucide.createIcons();
+            await realizarCarregamento(2000, "var(--accent)");
+
+            document.getElementById('instruction-step').style.display = "none";
+            document.getElementById('loader-bar').style.display = "none";
+            document.getElementById('final-results').style.display = "grid";
+            
+            const btnConcluir = document.getElementById('btn-concluir');
+            btnConcluir.style.display = "flex";
+            btnConcluir.onclick = () => {
+                goToPage('page-quiz');
+                renderCategories();
+            };
+            
+            document.getElementById('vitals-title').innerHTML = '<i data-lucide="check-circle"></i> SINAIS VITAIS COLETADOS';
+            lucide.createIcons();
+        }
+
+        /* BANCO DE DADOS ATUALIZADO E EQUILIBRADO
+           Perguntas inviáveis para totem foram removidas.
+           Sistema de Score direto: 
+           - Resposta Positiva Grave = Laranja (8 pts) ou Vermelho (11 pts) imediato.
+           - Resposta Moderada = Amarelo (5 pts).
+           - Resposta Leve / Negativas = Verde (0-4 pts).
+        */
+        const quizData = {
+            categorias: [
+                { id: 'resp', label: 'Problemas Respiratórios', icon: 'wind', class: 'cat-blue' },
+                { id: 'dor', label: 'Dores Intensas', icon: 'alert-circle', class: 'cat-red' },
+                { id: 'trauma', label: 'Acidentes e Traumas', icon: 'shield-alert', class: 'cat-orange' },
+                { id: 'malestar', label: 'Mal-estar e Febre', icon: 'thermometer', class: 'cat-yellow' },
+                { id: 'neuro', label: 'Sintomas Neurológicos', icon: 'brain', class: 'cat-purple' },
+                { id: 'gestante', label: 'Gestantes', icon: 'heart', class: 'cat-pink' }
+            ],
+            subcategorias: {
+                resp: [
+                    { id: 'Falta de Ar', label: 'Falta de Ar / Cansaço', icon: 'alert-triangle' },
+                    { id: 'Asma / Chiado', label: 'Crise de Asma ou Chiado', icon: 'activity' },
+                    { id: 'Tosse / Gripe', label: 'Tosse Persistente / Sintomas Gripais', icon: 'file-text' }
+                ],
+                dor: [
+                    { id: 'Dor no Peito', label: 'Dor no Peito / Tórax', icon: 'heart' },
+                    { id: 'Dor de Cabeça', label: 'Dor de Cabeça Forte', icon: 'frown' },
+                    { id: 'Dor Abdominal', label: 'Dor na Barriga / Abdômen', icon: 'activity' }
+                ],
+                trauma: [
+                    { id: 'Quedas', label: 'Quedas e Pancadas', icon: 'accessibility' },
+                    { id: 'Fraturas', label: 'Suspeita de Fratura ou Entorse', icon: 'bone' },
+                    { id: 'Cortes', label: 'Cortes Superficiais / Ferimentos', icon: 'droplet' }
+                ],
+                malestar: [
+                    { id: 'Febre', label: 'Febre / Calafrios', icon: 'thermometer' },
+                    { id: 'Vômitos', label: 'Vômitos ou Diarreia', icon: 'shield-alert' },
+                    { id: 'Tontura', label: 'Tontura ou Fraqueza', icon: 'orbit' }
+                ],
+                neuro: [
+                    { id: 'AVC / Derrame', label: 'Dificuldade de Fala ou Perda de Força', icon: 'zap' },
+                    { id: 'Confusão', label: 'Esquecimento / Confusão Súbita', icon: 'help-circle' }
+                ],
+                gestante: [
+                    { id: 'Dores / Contrações', label: 'Contrações ou Dor Abdominal', icon: 'clock' },
+                    { id: 'Sintomas Visuais', label: 'Dor de cabeça com Visão Embaçada', icon: 'eye' }
+                ]
+            },
+            perguntas: {
+                'Falta de Ar': [
+    { 
+        text: "Sua falta de ar é tão intensa que você sente dificuldade para falar uma frase curta sem precisar parar para respirar?", 
+        score: 11 
+    }, 
+    { 
+        text: "Você está sentindo essa falta de ar ou cansaço mesmo estando completamente em repouso (sentado ou deitado)?", 
+        score: 11 
+    }, 
+    { 
+        text: "A falta de ar começou de forma muito súbita (de repente, em poucos minutos) e está piorando rapidamente?", 
+        score: 8 
+    }, 
+    { 
+        text: "Essa falta de ar veio acompanhada de uma dor ou aperto forte no peito?", 
+        score: 8 
+    }, 
+        text: "Você possui histórico de problemas cardíacos grave (como insuficiência cardíaca) ou costuma acumular líquido nas pernas?", 
+        score: 5 
+    }, 
+    { 
+        text: "A falta de ar é moderada, mas você está com febre alta (acima de 38.5°C) ou calafrios?", 
+        score: 5 
+    }, 
+    { 
+        text: "O cansaço é leve e começou junto com sintomas de gripe, resfriado ou congestão nasal?", 
+        score: 2 
+    }  
+               'Asma / Chiado': [
+    {  text: "Você está com tanta dificuldade para respirar que não consegue falar frases completas sem pausar para puxar o ar?",
+        score: 11},
+    {text: "Sua crise de asma ou chiado começou de forma muito rápida e agressiva nas últimas horas?",
+        score: 8},
+    {text: "Você já utilizou sua medicação de resgate (bombinha/nebulização) em casa e mesmo assim o chiado e o cansaço não melhoraram?",
+        score: 8},
+    {text: "O chiado no peito veio acompanhado de febre, tosse com secreção escura ou dor nas costas ao respirar?",
+        score: 5},
+    {text: "Você faz uso de bombinha de asma ou corticoide todos os dias para conseguir controlar a respiração?",
+        score: 5},
+    {
+    text: "O chiado no peito é leve, começou após contato com poeira, fumaça ou mudança de tempo, e você consegue caminhar normalmente?",
+        score: 2
+    }
+],
+                'Dor Abdominal': [
+                    { text: "A dor na barriga é insuportável e impede você de andar ereto?", score: 8 },
+                    { text: "Sente apenas uma cólica ou queimação estomacal suportável?", score: 3 }
+                ],
+                'Quedas': [
+                    { text: "Houve batida na cabeça seguida de tontura contínua ou náuseas?", score: 8 },
+                    { text: "Apenas dor local no corpo devido ao impacto do tombo?", score: 4 }
+                ],
+                'Fraturas': [
+                    { text: "O membro afetado apresenta deformidade visível ou incapacidade total de mexer?", score: 8 },
+                    { text: "Consigo apoiar ou mexer o local, apesar de apresentar inchaço e dor?", score: 4 }
+                ],
+                'Cortes': [
+                    { text: "O ferimento continua sangrando de forma lenta mesmo após ser pressionado?", score: 5 },
+                    { text: "É um arranhão ou corte superficial que necessita apenas de curativo?", score: 2 }
+                ],
+                'Febre': [
+                    { text: "A febre está persistente acima de 38.5°C mesmo após tomar remédio?", score: 5 },
+                    { text: "Sente o corpo quente apenas com mal-estar leve?", score: 3 }
+                ],
+                'Vômitos': [
+                    { text: "Você apresentou mais de 4 episódios de vômito nas últimas poucas horas?", score: 5 },
+                    { text: "Apenas episódios isolados de enjoo sem desidratação aparente?", score: 2 }
+                ],
+                'Tontura': [
+                    { text: "A tontura é forte e causa nítida sensação de instabilidade ao tentar ficar de pé?", score: 5 },
+                    { text: "Apenas uma fraqueza leve por jejum ou cansaço?", score: 2 }
+                ],
+                'AVC / Derrame': [
+                    { text: "Notou boca torta ao sorrir ou perda de força em um dos braços iniciada agora?", score: 11 }
+                ],
+                'Confusão': [
+                    { text: "O paciente apresenta dificuldade para reconhecer familiares ou fala sem sentido?", score: 8 }
+                ],
+                'Dores / Contrações': [
+                    { text: "As contrações uterinas estão ocorrendo em intervalos curtos (menos de 5 em 5 minutos)?", score: 8 },
+                    { text: "Sente cólica abdominal leve constante abaixo do ventre?", score: 5 }
+                ],
+                'Sintomas Visuais': [
+                    { text: "Apresenta dor de cabeça forte associada a pontos brilhantes ou embaçamento na visão?", score: 11 }
+                ]
+            }
+        };
+
+        let currentScore = 0;
+        let currentSubcategory = "";
+
+        // Passo 1: Categorias Principais
+        function renderCategories() {
+            const container = document.getElementById('quiz-options');
+            const titulo = document.getElementById('quiz-question');
+            titulo.innerText = "Selecione a categoria principal do seu sintoma:";
+            container.innerHTML = "";
+            
+            quizData.categorias.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `btn-quiz ${cat.class}`;
+                btn.innerHTML = `<i data-lucide="${cat.icon}"></i> ${cat.label}`;
+                btn.onclick = () => renderSubCategories(cat.id, cat.class);
+                container.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        // Passo 2: Subcategorias
+        function renderSubCategories(catId, catClass) {
+            const container = document.getElementById('quiz-options');
+            const titulo = document.getElementById('quiz-question');
+            
+            titulo.innerText = "Selecione o sintoma ou queixa mais específica:";
+            container.innerHTML = "";
+
+            const subs = quizData.subcategorias[catId];
+            
+            subs.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = `btn-quiz ${catClass}`; 
+                btn.innerHTML = `<i data-lucide="${sub.icon}"></i> ${sub.label}`;
+                btn.onclick = () => startQuiz(sub.id);
+                container.appendChild(btn);
+            });
+
+            const btnVoltar = document.createElement('button');
+            btnVoltar.className = "btn-main";
+            btnVoltar.style.background = "#64748b";
+            btnVoltar.style.gridColumn = "1 / -1";
+            btnVoltar.style.marginTop = "15px";
+            btnVoltar.innerHTML = `<i data-lucide="arrow-left"></i> VOLTAR`;
+            btnVoltar.onclick = () => renderCategories();
+            container.appendChild(btnVoltar);
+
+            lucide.createIcons();
+        }
+
+        // Passo 3: Perguntas Sim/Não
+        function startQuiz(subId) {
+            currentSubcategory = subId;
+            currentScore = 0; 
+            const perguntas = quizData.perguntas[subId];
+            renderQuestions(perguntas, 0);
+        }
+
+        function renderQuestions(lista, index) {
+            const container = document.getElementById('quiz-options');
+            const titulo = document.getElementById('quiz-question');
+            
+            if (!lista || index >= lista.length) {
+                showFinalResult();
+                return;
+            }
+
+            titulo.innerText = lista[index].text;
+            container.innerHTML = `
+                <button class="btn-main" onclick="addScore(${lista[index].score}, ${index + 1})">SIM</button>
+                <button class="btn-main" style="background: #94a3b8; margin-top: 4px;" onclick="addScore(0, ${index + 1})">NÃO</button>
+            `;
+            lucide.createIcons();
+        }
+
+        function addScore(value, nextIndex) {
+            // O score agora captura o maior peso respondido para evitar distorções matemáticas
+            if (value > currentScore) {
+                currentScore = value;
+            }
+            renderQuestions(quizData.perguntas[currentSubcategory], nextIndex);
+        }
+
+        // Exibição e cálculo da classificação de Manchester
+        function showFinalResult() {
+            const content = document.getElementById('quiz-content');
+            let cor = "";
+            let urgencia = "";
+            let hex = "";
+
+            if (currentScore >= 11) { cor = "Vermelho"; urgencia = "EMERGÊNCIA (Imediato)"; hex = "#ef4444"; }
+            else if (currentScore >= 8) {  cor = "Laranja"; urgencia = "MUITO URGENTE (10 min)"; hex = "#f97316"; }
+            else if (currentScore >= 5) {  cor = "Amarelo"; urgencia = "URGENTE (60 min)"; hex = "#eab308"; }
+            else { cor = "Verde"; urgencia = "POUCO URGENTE (120 min)"; hex = "#22c55e"; }
+
+            const agora = new Date();
+            const hora = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
+
+            content.innerHTML = `
+                <h2 style="color: var(--primary-dark); text-align: center; font-size: 24px;">Protocolo de Manchester Concluído</h2>
+                <div class="result-badge" style="background: ${hex}">${urgencia}</div>
+                
+                <div style="text-align: left; background: #f8fafc; padding: 25px; border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--border-color);">
+                    <p style="margin-bottom: 12px; font-size: 16px;"><strong>Paciente:</strong> ${document.getElementById('nome').value}</p>
+                    <p style="margin-bottom: 12px; font-size: 16px;"><strong>Queixa Principal:</strong> ${currentSubcategory}</p>
+                    <p style="margin-bottom: 12px; font-size: 16px;"><strong>Classificação:</strong> Prioridade ${cor}</p>
+                    <p style="margin-bottom: 12px; font-size: 16px;"><strong>Horário de Emissão:</strong> ${hora}</p>
+                </div>
+                
+                <button class="btn-main" onclick="window.print()"><i data-lucide="printer"></i> IMPRIMIR SENHA DE ATENDIMENTO</button>
+                <button class="btn-main" style="margin-top:15px; background: #64748b" onclick="location.reload()"><i data-lucide="log-out"></i> FINALIZAR E SAIR</button>
+            `;
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
