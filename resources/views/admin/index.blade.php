@@ -84,6 +84,176 @@
         .section-title { font-size: 16px; font-weight: 700; color: var(--secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .section-title i { width: 20px; height: 20px; }
         .chart-container { height: 280px; width: 100%; position: relative; }
+        form {
+    max-width: 100%;
+    padding: 16px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid var(--border, #e2e8f0);
+    font-family: inherit;
+}
+
+/* Grid de 3 colunas para campos curtos e 2 para os demais */
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 0; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+
+form div { margin-bottom: 10px; display: flex; flex-direction: column; }
+
+form label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+form input, form select, form textarea {
+    width: 100%;
+    padding: 6px 10px; /* Padding reduzido */
+    font-size: 0.85rem;
+    color: #1e293b;
+    background: #ffffff;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+form input:focus, form select:focus, form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+form textarea { min-height: 50px; resize: vertical; }
+
+/* Botões alinhados à direita e menores */
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+form button {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+}
+
+form button[type="submit"] { background: #10b981; color: #fff; }
+form button[type="submit"]:hover { background: #059669; }
+form .btn-cancelar { background: #f1f5f9; color: #475569; border: 1px solid var(--border, #e2e8f0); }
+
+@media (max-width: 600px) {
+    .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; gap: 0; }
+}
+.form-row-expanded form {
+    max-width: 100%;
+    margin: 0;
+    padding: 10px;
+    background: transparent;
+    font-family: inherit;
+}
+
+.form-row-expanded .form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 0;
+}
+
+.form-row-expanded .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0;
+}
+
+.form-row-expanded form div {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row-expanded form label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-row-expanded form input,
+.form-row-expanded form select,
+.form-row-expanded form textarea {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    color: #1e293b;
+    background: #ffffff;
+    border: 1px solid var(--border, #cbd5e1);
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-row-expanded form input:focus,
+.form-row-expanded form select:focus,
+.form-row-expanded form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row-expanded form textarea {
+    min-height: 54px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-row-expanded .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 0;
+    flex-direction: row;
+}
+
+.form-row-expanded form button {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.15s;
+}
+
+.form-row-expanded form button[type="submit"] {
+    background: #10b981;
+    color: #ffffff;
+}
+
+.form-row-expanded form button[type="submit"]:hover {
+    background: #059669;
+}
+
+.form-row-expanded .btn-cancelar {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid var(--border, #e2e8f0);
+}
+
+.form-row-expanded .btn-cancelar:hover {
+    background: #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .form-row-expanded .form-grid-3,
+    .form-row-expanded .form-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}
     </style>
 </head>
 <body>

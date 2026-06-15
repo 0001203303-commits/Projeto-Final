@@ -26,20 +26,28 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>Totem 01 - Recepção</strong></td>
-                    <td>192.168.1.50</td>
-                    <td><span class="badge badge-online">● ONLINE</span></td>
-                </tr>
-                <tr>
-                    <td><strong>Totem 04 - Corredor B</strong></td>
-                    <td>192.168.1.53</td>
-                    <td><span class="badge badge-offline">● OFFLINE</span></td>
-                </tr>
+                @foreach($totens as $totem)
+                    <tr>
+                        <td><strong>Totem {{ $totem->dispositivo }}</strong></td>
+                        <td>{{ $totem->enderecoip }}</td> {{-- Corrigido para a coluna correta do banco --}}
+                        <td>
+                            @if($totem->status == 'online')
+                                <span class="badge badge-online" style="background: #d1fae5; color: #10b981; padding: 4px 8px; border-radius: 4px; font-weight: bold;">● ONLINE</span>
+                            @elseif($totem->status == 'desativado')
+                                <span class="badge badge-desativado" style="background: #f3f4f6; color: #6b7280; padding: 4px 8px; border-radius: 4px; font-weight: bold;">● DESATIVADO</span>
+                            @else
+                                <span class="badge badge-offline" style="background: #fee2e2; color: #ef4444; padding: 4px 8px; border-radius: 4px; font-weight: bold;">● OFFLINE</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
 </main>
+
+{{-- Incluindo o Chart.js caso não esteja no seu layout principal --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     window.addEventListener('DOMContentLoaded', () => {
@@ -47,11 +55,11 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Totem 01', 'Totem 02', 'Totem 03', 'Totem 04'],
+                labels: ['Totem 01', 'Totem 02', 'Totem 03'],
                 datasets: [{
                     label: 'Uptime %',
-                    data: [100, 98, 100, 45],
-                    backgroundColor: ['#10b981', '#10b981', '#10b981', '#ef4444'],
+                    data: [100, 98, 45],
+                    backgroundColor: ['#10b981', '#10b981', '#ef4444'],
                     borderRadius: 8
                 }]
             },
@@ -60,4 +68,4 @@
     });
 </script>
 
-@endsection 
+@endsection

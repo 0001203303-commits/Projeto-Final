@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 
 class TriagemController extends Controller
 {
-    // Passo 1: Listar Categorias Principais
+   
     public function index()
     {
-        $categorias = TriagemCategoria::whereNull('parent_id')->get();
-        return view('triagem.index', compact('categorias'));
+        
+        return view('triagem.index');
     }
 
-    // Passo 2: Mostrar Subcategorias baseadas na escolha
+    
     public function showSubcategorias($slug)
     {
         $categoriaPai = TriagemCategoria::where('slug', $slug)->firstOrFail();
@@ -23,22 +23,19 @@ class TriagemController extends Controller
 
         return view('triagem.subcategorias', compact('categoriaPai', 'subcategorias'));
     }
-
-    // Passo 3: Carregar o Quiz de perguntas da subcategoria escolhida
     public function startQuiz($slug)
     {
         $subcategoria = TriagemCategoria::where('slug', $slug)->with('perguntas')->firstOrFail();
         return view('triagem.quiz', compact('subcategoria'));
     }
 
-    // Passo 4: Processar as respostas e dar o veredito Manchester
-    public function finalizar(Request $request)
+       public function finalizar(Request $request)
     {
-        // Recebe as respostas do formulário (Array de scores)
+       
         $scores = $request->input('respostas', [0]);
         $maiorScore = max($scores);
 
-        // Lógica do Protocolo de Manchester
+    
         if ($maiorScore >= 11) {
             $resultado = ['cor' => 'Vermelho', 'urgencia' => 'EMERGÊNCIA (Imediato)', 'hex' => '#ef4444'];
         } elseif ($maiorScore >= 8) {
@@ -51,10 +48,6 @@ class TriagemController extends Controller
 
         return view('triagem.resultado', compact('resultado'));
     }
-    public function home()
-    {
-        return view('home');
-    }
-}
+      
 
-?>
+}
