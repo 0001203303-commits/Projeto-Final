@@ -33,6 +33,10 @@
     .btn-acao-editar:hover { background: #f1f5f9; border-color: #94a3b8; }
     .btn-acao-remover { padding: 6px 12px; border-radius: 6px; border: 1px solid #fee2e2; background: #ef4444; color: #ffffff; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: background 0.2s; }
     .btn-acao-remover:hover { background: #dc2626; }
+
+    .box-sintomas-totem { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; max-height: 150px; overflow-y: auto; }
+    .item-sintoma-totem { font-size: 0.8rem; margin-bottom: 6px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
+    .item-sintoma-totem:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     
     @media (max-width: 768px) { 
         .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; gap:2px; } 
@@ -140,8 +144,10 @@
                 <div>
                     <label for="new-urgencia">Classificação (Urgência):</label>
                     <select id="new-urgencia" name="urgencia">
-                        <option value="baixa">Pouco Urgente (Verde)</option>
+                        <option value="pouca">Mínima Urgência (Azul)</option>
+                        <option value="baixa" selected>Pouco Urgente (Verde)</option>
                         <option value="media">Urgente (Amarelo)</option>
+                        <option value="muito_urgente">Muito Urgente (Laranja)</option>
                         <option value="alta">Emergência (Vermelho)</option>
                     </select>
                 </div>
@@ -182,24 +188,53 @@
                 @forelse($Pacientes as $p)
                     @php
                         $urgencia = $p->urgencia ?? 'baixa';
-                        $bgCor = $urgencia == 'alta' ? '#f87171' : ($urgencia == 'media' ? '#fbbf24' : '#34d399');  
-                        $textoCor = $urgencia == 'alta' ? '#b91c1c' : ($urgencia == 'media' ? '#b45309' : '#065f46');
-                        $label = $urgencia == 'alta' ? 'Emergência' : ($urgencia == 'media' ? 'Urgente' : 'Pouco Urgente');
+                        
+                        // Lógica corrigida do Protocolo de Manchester
+                        if (str_contains(strtoupper($urgencia), 'VERMELHO') || strtoupper($urgencia) == 'ALTA') {
+                            $bgCor = '#f87171'; $textoCor = '#b91c1c'; $label = 'Emergência';
+                        } elseif (str_contains(strtoupper($urgencia), 'LARANJA') || strtoupper($urgencia) == 'MUITO_URGENTE') {
+                            $bgCor = '#f97316'; $textoCor = '#7c2d12'; $label = 'Muito Urgente';
+                        } elseif (str_contains(strtoupper($urgencia), 'AMARELO') || strtoupper($urgencia) == 'MEDIA') {
+                            $bgCor = '#fbbf24'; $textoCor = '#b45309'; $label = 'Urgente';
+                        } elseif (str_contains(strtoupper($urgencia), 'VERDE') || strtoupper($urgencia) == 'BAIXA') {
+                            $bgCor = '#34d399'; $textoCor = '#065f46'; $label = 'Pouco Urgente';
+                        } elseif (str_contains(strtoupper($urgencia), 'AZUL') || strtoupper($urgencia) == 'POUCA') {
+                            $bgCor = '#60a5fa'; $textoCor = '#1e3a8a'; $label = 'Mínima Urgência';
+                        } else {
+                            $bgCor = '#e5e7eb'; $textoCor = '#374151'; $label = 'Sem classificação';
+                        }
+
+                        // Tenta decodificar o JSON dos sintomas
+                        $sintomasRaw = $p->sintomas ?? $p->sintoma ?? '';
+                        $sintomasJson = json_decode($sintomasRaw, true);
+                        $isJson = (json_last_error() === JSON_ERROR_NONE && is_array($sintomasJson));
                     @endphp
                     <tr>
                         <td><strong>#{{ $p->protocolo ?? '---' }}</strong></td>
                         <td><span style="color: #1e293b; font-weight: 600;">{{ $p->nome ?? 'Sem Nome' }}</span></td>
                         <td>{{ $p->idade ?? '0' }} anos</td>
-                        <td>{{ isset($p->created_at
-                        
-                         ) ? $p->created_at->format('H:i') : '-' }}</td>
+                        <td>{{ isset($p->created_at) ? $p->created_at->format('H:i') : '-' }}</td>
                         <td>
-                            <span class="badge" style="background: {{ $bgCor }}; color: {{ $textoCor }}; padding: 6px 10px; border-radius: 6px; font-weight: 700; font-size: 0.70rem; letter-spacing: 0.05em;">
+                            <span class="badge" style="background: {{ $bgCor }}; color: {{ $textoCor }}; padding: 6px 10px; border-radius: 6px; font-weight: 700; font-size: 0.70rem; letter-spacing: 0.05em; display: inline-block;">
                                 {{ $label }}
                             </span>
                         </td>
                         <td style="max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            {{ $p->sintomas ?? $p->sintoma ?? 'Nenhum' }}
+                            @if($isJson)
+                                @php 
+                                    // Pega apenas as respostas "Sim" para resumir na tabela
+                                    $resumoSintomas = [];
+                                    foreach($sintomasJson as $item) {
+                                        if(($item['resposta'] ?? '') == 'Sim') {
+                                            $resumoSintomas[] = str_replace(['Você ', 'Sua ', 'Seu '], '', $item['pergunta']);
+                                        }
+                                    }
+                                @endphp
+                                <span style="color: #10b981; font-weight: 500;">[Totem]:</span> 
+                                {{ count($resumoSintomas) > 0 ? implode(', ', $resumoSintomas) : 'Respondeu não a tudo' }}
+                            @else
+                                {{ $sintomasRaw ?: 'Nenhum' }}
+                            @endif
                         </td>
                         <td>
                             <div style="display: flex; gap: 6px;">
@@ -291,19 +326,34 @@
                                         <div>
                                             <label for="urgencia-{{ $p->id }}">Classificação (Urgência):</label>
                                             <select id="urgencia-{{ $p->id }}" name="urgencia">
-                                                <option value="baixa" {{ $urgencia == 'baixa' ? 'selected' : '' }}>Pouco Urgente (Verde)</option>
-                                                <option value="media" {{ $urgencia == 'media' ? 'selected' : '' }}>Urgente (Amarelo)</option>
-                                                <option value="alta" {{ $urgencia == 'alta' ? 'selected' : '' }}>Emergência (Vermelho)</option>
+                                                <option value="pouca" {{ $urgencia == 'pouca' || str_contains(strtoupper($urgencia), 'AZUL') ? 'selected' : '' }}>Mínima Urgência (Azul)</option>
+                                                <option value="baixa" {{ $urgencia == 'baixa' || str_contains(strtoupper($urgencia), 'VERDE') ? 'selected' : '' }}>Pouco Urgente (Verde)</option>
+                                                <option value="media" {{ $urgencia == 'media' || str_contains(strtoupper($urgencia), 'AMARELO') ? 'selected' : '' }}>Urgente (Amarelo)</option>
+                                                <option value="muito_urgente" {{ $urgencia == 'muito_urgente' || str_contains(strtoupper($urgencia), 'LARANJA') ? 'selected' : '' }}>Muito Urgente (Laranja)</option>
+                                                <option value="alta" {{ $urgencia == 'alta' || str_contains(strtoupper($urgencia), 'VERMELHO') ? 'selected' : '' }}>Emergência (Vermelho)</option>
                                             </select>
                                         </div>
                                     </div>
 
                                     <div class="form-grid-2">
                                         <div>
-                                            <label for="sintoma-{{ $p->id }}">Sintomas:</label>
-                                            <textarea id="sintoma-{{ $p->id }}" name="sintoma">{{ $p->sintomas ?? $p->sintoma ?? '' }}</textarea>
+                                            <label>Sintomas / Triagem Eletrônica:</label>
+                                            @if($isJson)
+                                                <div class="box-sintomas-totem">
+                                                    @foreach($sintomasJson as $item)
+                                                        <div class="item-sintoma-totem">
+                                                            <strong>Q:</strong> {{ $item['pergunta'] }} <br>
+                                                            <strong>R:</strong> <span style="color: {{ $item['resposta'] == 'Sim' ? '#ef4444' : '#3b82f6' }}; font-weight: bold;">{{ $item['resposta'] }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                                <input type="hidden" name="sintoma" value="{{ $sintomasRaw }}">
+                                                <span style="font-size:0.75rem; color:#64748b; font-style:italic;">* Dados importados do Totem de Triagem (Não editável manualmente).</span>
+                                            @else
+                                                <textarea id="sintoma-{{ $p->id }}" name="sintoma">{{ $sintomasRaw }}</textarea>
+                                            @endif
                                         </div>
-                                        <div>
+                                        <div>       
                                             <label for="antecedentes_pessoais-{{ $p->id }}">Antecedentes:</label>
                                             <textarea id="antecedentes_pessoais-{{ $p->id }}" name="antecedentes_pessoais">{{ $p->antecedentes_pessoais ?? '' }}</textarea>
                                         </div>
@@ -389,7 +439,8 @@
         const protocolos = document.querySelectorAll('.mascara-protocolo');
         protocolos.forEach(input => {
             if (!input.dataset.maskApplied) {
-                IMask(input, { mask: '#000000000' });
+                // Removido o caractere '#' do padrão da máscara para evitar que o IMask bloqueie a digitação
+                IMask(input, { mask: '000000000' });
                 input.dataset.maskApplied = true;
             }
         }); 

@@ -68,8 +68,13 @@
         <div class="footer-actions">
             <button class="btn btn-secondary">Cancelar</button>
             <button class="btn btn-primary" onclick="confirmarSalvar()">
+                
                 <i data-lucide="save"></i> Aplicar Alterações
             </button>
+                <button class="btn btn-danger" onclick="efetuarLogout()" style="margin-top: 20px; color: white; background-color: #dc3545;">
+                    <i data-lucide="log-out"></i> Sair
+                </button>
+
         </div>
     </div>
 </main>
@@ -77,6 +82,10 @@
 <script>
     function confirmarSalvar() {
         alert("✅ Configurações salvas e replicadas!");
+    }
+    function efetuarLogout() {
+        // Redireciona o navegador diretamente para a rota de logout do Laravel
+        window.location.href = "{{ route('logout') }}";
     }
 
     function salvarPerfil() {

@@ -1,33 +1,49 @@
+// Gerenciamento de Estado Global Único da Aplicação
+const AppState = {
+    dadosTriagem: {
+        nome: '',
+        cpf: '',
+        bpm: 0,
+        spo2: 0,
+        temp: 0.0,
+        nivel_dor: 0,
+        respostas_quiz: [],
+        score_final: 0
+    },
+    selectedSubcategories: [],
+    questionsToAsk: [],
+    currentQuestionIndex: 0,
+    currentScore: 0,
+    userPainLevel: 0
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
     const cpfInput = document.getElementById('cpf');
     if (cpfInput) {
         cpfInput.addEventListener('input', (e) => {
-            let v = e.target.value.replace(/\D/g, "");
+            let v = e.target.value.replace(/\D/g, ""); 
             if (v.length > 11) v = v.substring(0, 11);
-            v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            
+            if (v.length > 9) {
+                v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{1,2})$/, "$1.$2.$3-$4");
+            } else if (v.length > 6) {
+                v = v.replace(/^(\d{3})(\d{3})(\d{1,3})$/, "$1.$2.$3");
+            } else if (v.length > 3) {
+                v = v.replace(/^(\d{3})(\d{1,3})$/, "$1.$2");
+            }
             e.target.value = v;
+        });
+
+        cpfInput.addEventListener('keydown', (e) => {
+            const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+            if (!allowedKeys.includes(e.key) && isNaN(Number(e.key))) {
+                e.preventDefault();
+            }
         });
     }
 });
-
-const dadosTriagem = {
-    nome: '',
-    cpf: '',
-    bpm: 0,
-    spo2: 0,
-    temp: 0.0,
-    nivel_dor: 0,
-    respostas_quiz: [],
-    score_final: 0
-};
-
-let selectedSubcategories = [];
-let questionsToAsk = [];
-let currentQuestionIndex = 0;
-let currentScore = 0;
-let userPainLevel = 0;
 
 function goToPage(pageId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -36,380 +52,389 @@ function goToPage(pageId) {
 
 function irParaColeta(event) {
     event.preventDefault();
-    dadosTriagem.nome = document.getElementById('nome').value;
-    dadosTriagem.cpf = document.getElementById('cpf').value;
+    
+    const nomeInput = document.getElementById('nome');
+    const cpfInput = document.getElementById('cpf');
+    
+    const nomeValue = nomeInput.value.trim();
+    const cpfValue = cpfInput.value.trim();
+
+    // 1. Validação estrita do Nome
+    if (!nomeValue || nomeValue.length < 3) {
+        alert(nomeInput.getAttribute('required-message') || "Por favor, insira o seu nome completo antes de avançar.");
+        nomeInput.focus();
+        return; // Bloqueia o avanço
+    }
+
+    // 2. Validação estrita do CPF (apenas números)
+    const numerosCpf = cpfValue.replace(/\D/g, "");
+    if (!numerosCpf || numerosCpf.length !== 11) {
+        alert(cpfInput.getAttribute('required-message') || "CPF inválido ou incompleto! Por favor, insira todos os 11 dígitos.");
+        cpfInput.focus();
+        return; // Bloqueia o avanço
+    }
+
+    // Se passou em todas as validações, grava no estado global
+    AppState.dadosTriagem.nome = nomeValue;
+    AppState.dadosTriagem.cpf = numerosCpf;
+
+    // Avança para a próxima página
     goToPage('page-vitals');
-    iniciarFluxoColeta();
+    simularSensores();
 }
 
-function realizarCarregamento(tempoMs, cor) {
-    return new Promise(resolve => {
-        const fill = document.getElementById('loader-fill');
-        fill.style.background = cor;
-        fill.style.width = "0%";
-        
-        let start = null;
-        function step(timestamp) {
-            if (!start) start = timestamp;
-            let progress = timestamp - start;
-            let percent = Math.min((progress / tempoMs) * 100, 100);
-            fill.style.width = percent + "%";
-            if (progress < tempoMs) {
-                window.requestAnimationFrame(step);
-            } else {
-                setTimeout(resolve, 200);
-            }
+function simularSensores() {
+    const loaderFill = document.getElementById('loader-fill');
+    const instructionText = document.getElementById('instruction-text');
+    let progress = 0;
+
+    instructionText.innerText = "Coletando Sinais Vitais...";
+
+    const interval = setInterval(() => {
+        progress += 5;
+        if (loaderFill) loaderFill.style.width = `${progress}%`;
+
+        if (progress >= 100) {
+            clearInterval(interval);
+            
+            AppState.dadosTriagem.bpm = Math.floor(Math.random() * (95 - 70 + 1)) + 70;
+            AppState.dadosTriagem.spo2 = Math.floor(Math.random() * (100 - 96 + 1)) + 96;
+            AppState.dadosTriagem.temp = parseFloat((Math.random() * (37.2 - 36.2) + 36.2).toFixed(1));
+
+            document.getElementById('vital-bpm').innerText = AppState.dadosTriagem.bpm;
+            document.getElementById('vital-spo2').innerText = `${AppState.dadosTriagem.spo2}%`;
+            document.getElementById('vital-temp').innerText = `${AppState.dadosTriagem.temp}°C`;
+
+            instructionText.innerText = "Leitura Concluída com Sucesso!";
+            
+            const btnConcluir = document.getElementById('btn-concluir');
+            btnConcluir.style.display = "inline-flex";
+            btnConcluir.onclick = () => {
+                goToPage('page-quiz');
+                renderCategories(); // Inicializa o quiz adaptado para interseção
+            };
         }
-        window.requestAnimationFrame(step);
-    });
+    }, 100);
 }
 
-async function iniciarFluxoColeta() {
-    const text = document.getElementById('instruction-text');
-    const sub = document.getElementById('sub-instruction');
-    const icon = document.getElementById('instruction-icon');
-
-    icon.innerHTML = '<i data-lucide="fingerprint" size="80"></i>';
-    icon.style.color = "#3182ce";
-    text.innerText = "PASSO 1: Oximetria";
-    sub.innerText = "Insira seu dedo indicador firmemente no oxímetro acoplado ao totem e mantenha-o imóvel.";
-    lucide.createIcons();
-    await realizarCarregamento(3000, "#3182ce");
-
-    icon.innerHTML = '<i data-lucide="thermometer" size="80"></i>';
-    icon.style.color = "#dd6b20";
-    text.innerText = "PASSO 2: Temperatura Corporal";
-    sub.innerText = "Aproxime sua testa ou o seu pulso do sensor infravermelho lateral (mantenha a distância de 5cm).";
-    lucide.createIcons();
-    await realizarCarregamento(3000, "#dd6b20");
-
-    icon.innerHTML = '<i data-lucide="refresh-cw" size="80"></i>';
-    icon.style.color = "var(--primary)";
-    text.innerText = "Analisando Sinais Vitais...";
-    sub.innerText = "Aguarde enquanto estruturamos os dados aferidos.";
-    lucide.createIcons();
-    await realizarCarregamento(1500, "var(--accent)");
-
-    dadosTriagem.bpm = Math.floor(Math.random() * (110 - 65 + 1)) + 65;
-    dadosTriagem.spo2 = Math.floor(Math.random() * (100 - 94 + 1)) + 94;
-    dadosTriagem.temp = (Math.random() * (38.5 - 36.2) + 36.2).toFixed(1);
-
-    document.getElementById('vital-bpm').innerText = dadosTriagem.bpm;
-    document.getElementById('vital-spo2').innerText = dadosTriagem.spo2 + "%";
-    document.getElementById('vital-temp').innerText = dadosTriagem.temp + "°C";
-
-    document.getElementById('instruction-step').style.display = "none";
-    document.getElementById('loader-bar').style.display = "none";
-    document.getElementById('final-results').style.display = "grid";
-    
-    const btnConcluir = document.getElementById('btn-concluir');
-    btnConcluir.style.display = "flex";
-    btnConcluir.onclick = () => {
-        goToPage('page-quiz');
-        renderCategories();
-    };
-    
-    document.getElementById('vitals-title').innerHTML = '<i data-lucide="check-circle"></i> SINAIS VITAIS COLETADOS';
-    lucide.createIcons();
-}
-
+// PASSO 1 DO QUIZ: Escolha de múltiplas categorias (Interseção)
 function renderCategories() {
-    selectedSubcategories = [];
-    questionsToAsk = [];
-    currentQuestionIndex = 0;
-    currentScore = 0;
-    userPainLevel = 0;
-    dadosTriagem.respostas_quiz = [];
+    AppState.selectedSubcategories = [];
+    AppState.questionsToAsk = [];
+    AppState.currentQuestionIndex = 0;
+    AppState.currentScore = 0;
+    AppState.userPainLevel = 0;
+    AppState.dadosTriagem.respostas_quiz = [];
 
     const container = document.getElementById('quiz-options');
     const titulo = document.getElementById('quiz-question');
     
-    container.style.display = "grid";
-    titulo.innerText = "Olá! Para iniciarmos sua triagem, escolha o grupo que melhor descreve sua queixa:";
+    container.className = "quiz-grid";
+    titulo.innerText = "Escolha um ou mais grupos que descrevem o que está a sentir no momento:";
     container.innerHTML = "";
     
     window.quizData.categorias.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `btn-quiz ${cat.class}`;
-        btn.innerHTML = `<i data-lucide="${cat.icon}"></i> ${cat.label}`;
-        btn.onclick = () => renderSubCategories(cat.id, cat.class);
-        container.appendChild(btn);
-    });
-    lucide.createIcons();
-}
-
-function renderSubCategories(catId, catClass) {
-    const container = document.getElementById('quiz-options');
-    const titulo = document.getElementById('quiz-question');
-    
-    titulo.innerText = "Selecione um ou mais sintomas que você está sentindo no momento:";
-    container.innerHTML = "";
-
-    const subs = window.quizData.subcategorias[catId] || [];
-    
-    subs.forEach(sub => {
         const wrapper = document.createElement('div');
-        wrapper.style.display = "flex";
-        wrapper.style.alignItems = "center";
-        wrapper.style.padding = "18px";
-        wrapper.style.background = "#f8fafc";
-        wrapper.style.border = "2px solid #e2e8f0";
-        wrapper.style.borderRadius = "14px";
-        wrapper.style.cursor = "pointer";
-        wrapper.style.transition = "all 0.2s";
+        wrapper.className = `sub-card-checkbox ${cat.class}`; 
 
         wrapper.innerHTML = `
-            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" style="width: 26px; height: 26px; margin-right: 15px; cursor: pointer;">
-            <label for="chk-${sub.id}" style="font-size: 18px; font-weight: 600; color: #1e293b; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%;">
-                <i data-lucide="${sub.icon}"></i> ${sub.label}
+            <input type="checkbox" id="cat-chk-${cat.id}" value="${cat.id}" style="display:none;">
+            <label for="cat-chk-${cat.id}" style="width: 100%; display: flex; align-items: center; gap: 15px; cursor: pointer; margin: 0;">
+                <i data-lucide="${cat.icon}"></i> ${cat.label}
             </label>
         `;
 
         const checkbox = wrapper.querySelector('input');
+        
         wrapper.onclick = (e) => {
-            if(e.target !== checkbox && e.target.tagName !== 'LABEL') {
+            if (e.target !== checkbox) {
                 checkbox.checked = !checkbox.checked;
             }
-            wrapper.style.borderColor = checkbox.checked ? "var(--primary)" : "#e2e8f0";
-            wrapper.style.background = checkbox.checked ? "#f0fdf4" : "#f8fafc";
+            wrapper.classList.toggle('checked', checkbox.checked);
         };
 
         container.appendChild(wrapper);
     });
 
-    const actions = document.createElement('div');
-    actions.style.gridColumn = "1 / -1";
-    actions.style.display = "flex";
-    actions.style.gap = "15px";
-    actions.style.marginTop = "25px";
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = "quiz-actions-container";
+
+    const btnAvancar = document.createElement('button');
+    btnAvancar.type = "button";
+    btnAvancar.className = "btn-main";
+    btnAvancar.style.width = "100%";
+    btnAvancar.innerHTML = `CONFIRMAR GRUPOS E VER SINTOMAS <i data-lucide="arrow-right"></i>`;
+    btnAvancar.onclick = () => {
+        const checked = container.querySelectorAll('input[type="checkbox"]:checked');
+        if (checked.length === 0) {
+            alert("Por favor, selecione pelo menos um grupo de queixas antes de avançar.");
+            return;
+        }
+        
+        const categoriasSelecionadas = Array.from(checked).map(cb => cb.value);
+        renderSubCategories(categoriasSelecionadas);
+    };
+
+    actionsContainer.appendChild(btnAvancar);
+    container.appendChild(actionsContainer);
+    lucide.createIcons();
+}
+
+// PASSO 2 DO QUIZ: Junta todos os sintomas específicos das categorias escolhidas
+function renderSubCategories(categoriasIds) {
+    const container = document.getElementById('quiz-options');
+    const titulo = document.getElementById('quiz-question');
+    
+    titulo.innerText = "Agora, selecione todos os sintomas específicos que se aplicam ao seu caso:";
+    container.innerHTML = "";
+
+    let subsUnificadas = [];
+    categoriasIds.forEach(catId => {
+        const subs = window.quizData.subcategorias[catId] || [];
+        subsUnificadas = subsUnificadas.concat(subs);
+    });
+    
+    subsUnificadas.forEach(sub => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "sub-card-checkbox";
+
+        wrapper.innerHTML = `
+            <input type="checkbox" id="chk-${sub.id}" value="${sub.id}" style="display:none;">
+            <label for="chk-${sub.id}" style="width: 100%; display: flex; align-items: center; gap: 15px; cursor: pointer; margin: 0;">
+                <i data-lucide="${sub.icon}"></i> ${sub.label}
+            </label>
+        `;
+
+        const checkbox = wrapper.querySelector('input');
+        
+        wrapper.onclick = (e) => {
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            wrapper.classList.toggle('checked', checkbox.checked);
+        };
+
+        container.appendChild(wrapper);
+    });
+
+    const actionsContainer = document.createElement('div');
+    actionsContainer.className = "quiz-actions-container";
 
     const btnVoltar = document.createElement('button');
-    btnVoltar.className = "btn-main";
-    btnVoltar.style.background = "#64748b";
-    btnVoltar.style.flex = "1";
+    btnVoltar.type = "button";
+    btnVoltar.className = "btn-main btn-secondary";
     btnVoltar.innerHTML = `<i data-lucide="arrow-left"></i> Voltar`;
     btnVoltar.onclick = () => renderCategories();
 
     const btnAvancar = document.createElement('button');
-    btnAvancar.className = "btn-main";
-    btnAvancar.style.flex = "2";
-    btnAvancar.innerHTML = `Continuar <i data-lucide="arrow-right"></i>`;
+    btnAvancar.type = "button";
+    btnAvancar.className = "btn-main btn-flex-2";
+    btnAvancar.innerHTML = `CONTINUAR <i data-lucide="arrow-right"></i>`;
     btnAvancar.onclick = () => {
         const checked = container.querySelectorAll('input[type="checkbox"]:checked');
         if (checked.length === 0) {
-            alert("Por favor, selecione ao menos uma opção antes de prosseguir.");
+            alert("Por favor, selecione pelo menos um sintoma para continuar.");
             return;
         }
-        checked.forEach(cb => selectedSubcategories.push(cb.value));
+        
+        AppState.selectedSubcategories = Array.from(checked).map(cb => cb.value);
         renderPainScale();
     };
 
-    actions.appendChild(btnVoltar);
-    actions.appendChild(btnAvancar);
-    container.appendChild(actions);
+    actionsContainer.appendChild(btnVoltar);
+    actionsContainer.appendChild(btnAvancar);
+    container.appendChild(actionsContainer);
     lucide.createIcons();
 }
 
+// PASSO 3 DO QUIZ: Escala de dor
 function renderPainScale() {
     const container = document.getElementById('quiz-options');
     const titulo = document.getElementById('quiz-question');
     
-    titulo.innerText = "Em uma escala de 0 a 10, qual é o nível da dor ou desconforto que você sente agora?";
-    container.innerHTML = "";
-    container.style.display = "block";
+    titulo.innerText = "Numa escala de 0 a 10, qual é o nível da sua dor ou desconforto agora?";
+    container.className = ""; 
+    container.innerHTML = `
+        <div class="pain-scale-container">
+            <div id="pain-score" class="pain-score-display level-0">0</div>
+            <div id="pain-desc" class="pain-desc-display level-0">Sem Dor</div>
+            <input type="range" id="pain-range" class="pain-slider" min="0" max="10" value="0">
+        </div>
+        <div class="quiz-actions-container">
+            <button type="button" class="btn-main" id="btn-iniciar-perguntas" style="width: 100%;">
+                INICIAR QUESTIONÁRIO DE RISCO <i data-lucide="play"></i>
+            </button>
+        </div>
+    `;
 
-    const scaleWrapper = document.createElement('div');
-    scaleWrapper.style.width = "100%";
-    scaleWrapper.style.textAlign = "center";
-    scaleWrapper.style.padding = "20px 0";
+    const slider = document.getElementById('pain-range');
+    const displayScore = document.getElementById('pain-score');
+    const displayDesc = document.getElementById('pain-desc');
 
-    const scoreDisplay = document.createElement('div');
-    scoreDisplay.style.fontSize = "64px";
-    scoreDisplay.style.fontWeight = "800";
-    scoreDisplay.style.color = "#64748b";
-    scoreDisplay.style.marginBottom = "10px";
-    scoreDisplay.innerText = "0";
+    const descricoesDor = [
+        "Sem Dor", "Dor Muito Leve", "Dor Leve", "Dor Suportável", 
+        "Dor Moderada", "Dor Incomoda", "Dor Intensa", "Dor Forte", 
+        "Dor Muito Forte", "Dor Insuportável", "Pior Dor Imaginável"
+    ];
 
-    const descDisplay = document.createElement('div');
-    descDisplay.style.fontSize = "18px";
-    descDisplay.style.fontWeight = "600";
-    descDisplay.style.color = "#64748b";
-    descDisplay.style.marginBottom = "30px";
-    descDisplay.innerText = "Sem Dor";
-
-    const slider = document.createElement('input');
-    slider.type = "range";
-    slider.min = "0";
-    slider.max = "10";
-    slider.value = "0";
-    slider.style.width = "100%";
-    slider.style.height = "25px";
-    slider.style.cursor = "pointer";
-
-    const colors = ["#22c55e", "#4ade80", "#a3e635", "#d9f99d", "#fef08a", "#fef08a", "#fed7aa", "#fdba74", "#f97316", "#ef4444", "#b91c1c"];
-    const descricoes = ["Sem Dor", "Dor muito leve", "Dor leve", "Dor tolerável", "Dor moderada", "Dor incômoda", "Dor intensa", "Dor muito forte", "Dor severa", "Dor insuportável", "A pior dor possível"];
-
-    slider.oninput = () => {
-        const val = parseInt(slider.value);
-        scoreDisplay.innerText = val;
-        scoreDisplay.style.color = colors[val];
-        descDisplay.innerText = descricoes[val];
-        descDisplay.style.color = colors[val];
-        userPainLevel = val;
+    slider.oninput = function() {
+        const val = this.value;
+        AppState.userPainLevel = parseInt(val);
+        
+        displayScore.innerText = val;
+        displayScore.className = `pain-score-display level-${val}`;
+        
+        displayDesc.innerText = descricoesDor[val];
+        displayDesc.className = `pain-desc-display level-${val}`;
     };
 
-    scaleWrapper.appendChild(scoreDisplay);
-    scaleWrapper.appendChild(descDisplay);
-    scaleWrapper.appendChild(slider);
-    container.appendChild(scaleWrapper);
-
-    const btnConfirmarDor = document.createElement('button');
-    btnConfirmarDor.className = "btn-main";
-    btnConfirmarDor.style.marginTop = "30px";
-    btnConfirmarDor.style.width = "100%";
-    btnConfirmarDor.innerHTML = `Confirmar e Responder Perguntas <i data-lucide="chevron-right"></i>`;
-    btnConfirmarDor.onclick = () => {
-        dadosTriagem.nivel_dor = userPainLevel;
-
-        if (userPainLevel >= 9) currentScore = 11;
-        else if (userPainLevel >= 7) currentScore = 8;
-        else if (userPainLevel >= 5) currentScore = 5;
-
+    document.getElementById('btn-iniciar-perguntas').onclick = () => {
+        AppState.dadosTriagem.nivel_dor = AppState.userPainLevel;
         buildQuestionnaire();
     };
-    container.appendChild(btnConfirmarDor);
     lucide.createIcons();
 }
 
+// PASSO 4: Monta o questionário acumulando as perguntas da interseção dos sintomas
 function buildQuestionnaire() {
-    questionsToAsk = [];
-    selectedSubcategories.forEach(subId => {
-        if (window.quizData.perguntas[subId]) {
-            window.quizData.perguntas[subId].forEach(p => {
-                // Injetando explicitamente a propriedade stopOnPositive no array de perguntas a fazer
-                questionsToAsk.push({ 
-                    subcategoria: subId, 
-                    texto: p.text, 
-                    score: p.score, 
-                    stopOnPositive: p.stopOnPositive || false 
+    AppState.questionsToAsk = [];
+    
+    AppState.selectedSubcategories.forEach(subId => {
+        const perguntasSintoma = window.quizData.perguntas[subId] || [];
+        perguntasSintoma.forEach(q => {
+            // Evita adicionar perguntas repetidas caso sintomas partilhem a mesma regra
+            if (!AppState.questionsToAsk.some(existente => existente.text === q.text)) {
+                AppState.questionsToAsk.push({
+                    sintoma: subId,
+                    text: q.text,
+                    score: q.score,
+                    stopOnPositive: q.stopOnPositive
                 });
-            });
-        }
+            }
+        });
     });
 
-    if (questionsToAsk.length > 0) {
-        currentQuestionIndex = 0;
-        askNextQuestion();
-    } else {
+    if (AppState.questionsToAsk.length === 0) {
         finalizarTriagem();
+    } else {
+        askNextQuestion();
     }
 }
 
 function askNextQuestion() {
+    if (AppState.currentQuestionIndex >= AppState.questionsToAsk.length) {
+        finalizarTriagem();
+        return;
+    }
+
     const container = document.getElementById('quiz-options');
     const titulo = document.getElementById('quiz-question');
-    container.innerHTML = "";
-    container.style.display = "grid";
-    container.style.gridTemplateColumns = "1fr 1fr";
-    container.style.gap = "20px";
+    const perguntaAtual = AppState.questionsToAsk[AppState.currentQuestionIndex];
 
-    if (currentQuestionIndex < questionsToAsk.length) {
-        const perguntaAtual = questionsToAsk[currentQuestionIndex];
-        titulo.innerText = perguntaAtual.texto;
+    titulo.innerText = perguntaAtual.text;
+    container.className = "quiz-grid dual-column";
+    container.innerHTML = `
+        <button type="button" class="sub-card-checkbox" id="btn-resp-sim" style="justify-content: center; font-size: 20px; font-weight: bold; height: 100px;">
+            <i data-lucide="check-circle" style="color: #22c55e;"></i> SIM
+        </button>
+        <button type="button" class="sub-card-checkbox" id="btn-resp-nao" style="justify-content: center; font-size: 20px; font-weight: bold; height: 100px;">
+            <i data-lucide="x-circle" style="color: #ef4444;"></i> NÃO
+        </button>
+    `;
 
-        const btnSim = document.createElement('button');
-        btnSim.className = "btn-quiz cat-red";
-        btnSim.style.justifyContent = "center";
-        btnSim.innerHTML = `<i data-lucide="check"></i> SIM`;
-        btnSim.onclick = () => {
-            if (perguntaAtual.score > currentScore) {
-                currentScore = perguntaAtual.score;
-            }
-            dadosTriagem.respostas_quiz.push({ pergunta: perguntaAtual.texto, resposta: 'Sim' });
-            
-            // SE FOR UMA PARADA CRÍTICA POSITIVA (ALERTA VERMELHO / LARANJA MÁXIMO), ENCERRA IMEDIATAMENTE
-            if (perguntaAtual.stopOnPositive) {
-                finalizarTriagem();
-            } else {
-                currentQuestionIndex++;
-                askNextQuestion();
-            }
-        };
+    document.getElementById('btn-resp-sim').onclick = () => processaResposta(true);
+    document.getElementById('btn-resp-nao').onclick = () => processaResposta(false);
+    lucide.createIcons();
+}
 
-        const btnNao = document.createElement('button');
-        btnNao.className = "btn-quiz cat-blue";
-        btnNao.style.justifyContent = "center";
-        btnNao.innerHTML = `<i data-lucide="x"></i> NÃO`;
-        btnNao.onclick = () => {
-            dadosTriagem.respostas_quiz.push({ pergunta: perguntaAtual.texto, resposta: 'Não' });
-            currentQuestionIndex++;
-            askNextQuestion();
-        };
+function processaResposta(respostaSim) {
+    const perguntaAtual = AppState.questionsToAsk[AppState.currentQuestionIndex];
+    
+    AppState.dadosTriagem.respostas_quiz.push({
+        pergunta: perguntaAtual.text,
+        resposta: respostaSim ? 'Sim' : 'Não',
+        sintoma_relacionado: perguntaAtual.sintoma
+    });
 
-        container.appendChild(btnSim);
-        container.appendChild(btnNao);
-        lucide.createIcons();
-    } else {
-        finalizarTriagem();
+    if (respostaSim) {
+        if (perguntaAtual.score > AppState.currentScore) {
+            AppState.currentScore = perguntaAtual.score;
+        }
+        if (perguntaAtual.stopOnPositive) {
+            AppState.currentScore = Math.max(AppState.currentScore, perguntaAtual.score);
+            finalizarTriagem();
+            return;
+        }
     }
+
+    AppState.currentQuestionIndex++;
+    askNextQuestion();
 }
 
 async function finalizarTriagem() {
-    dadosTriagem.score_final = currentScore;
-
-    const titulo = document.getElementById('quiz-question');
     const container = document.getElementById('quiz-options');
-    
-    titulo.innerText = "Processando Classificação de Risco...";
-    container.innerHTML = `<div style="text-align:center; width:100%; color:var(--primary);"><i data-lucide="loader" class="animate-spin" size="48"></i> Enviando dados para o sistema...</div>`;
+    const titulo = document.getElementById('quiz-question');
+
+    titulo.innerText = "A calcular a Classificação...";
+    container.className = "";
+    container.innerHTML = `
+        <div class="loading-center-container" style="text-align:center; padding: 40px;">
+            <i data-lucide="refresh-cw" size="48" class="animate-spin" style="margin-bottom:15px;"></i>
+            <p style="font-weight: 600;">A processar os dados de saúde com o servidor...</p>
+        </div>
+    `;
     lucide.createIcons();
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const rotaSalvar = document.querySelector('meta[name="route-salvar"]').content;
+    AppState.dadosTriagem.score_final = AppState.currentScore;
 
     try {
-        const resposta = await fetch(rotaSalvar, {
-            method: "POST",
+        const urlSalvar = document.querySelector('meta[name="route-salvar"]').getAttribute('content');
+        const tokenCsrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const resposta = await fetch(urlSalvar, {
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "X-CSRF-TOKEN": csrfToken
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': tokenCsrf,
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(dadosTriagem)
+            body: JSON.stringify(AppState.dadosTriagem)
         });
 
+        if (!resposta.ok) throw new Error(`HTTP error! status: ${resposta.status}`);
+        
         const resultadoServidor = await resposta.json();
 
         if (resultadoServidor.success) {
-            titulo.innerText = "Triagem Concluída com Sucesso!";
-            container.style.display = "block";
+            titulo.innerText = "Triagem Finalizada!";
             container.innerHTML = `
-                <p style="text-align:center; font-size:18px; margin-bottom:20px;">
-                    Paciente: <strong>${dadosTriagem.nome}</strong><br>
-                    Sua classificação foi calculada com sucesso pelo Protocolo de Manchester.
-                </p>
-                <div class="result-badge" style="background-color: ${resultadoServidor.cor_hex}; text-align: center; padding: 15px; border-radius: 8px; color: white; font-weight: bold;">
-                    Classificação: ${resultadoServidor.classificacao}
+                <div class="result-block-container" style="text-align: center; padding: 20px;">
+                    <p class="result-user-info" style="font-size:16px; margin-bottom: 20px;">
+                        Paciente: <strong>${AppState.dadosTriagem.nome}</strong><br>
+                        A sua classificação de risco foi calculada com sucesso pelo sistema.
+                    </p>
+                    <div class="result-badge" style="background-color: ${resultadoServidor.cor_hex || '#64748b'}; padding: 15px; border-radius:8px; color:white; font-weight:bold; font-size:18px; margin-bottom:20px;">
+                        CLASSIFICAÇÃO: ${resultadoServidor.classificacao}
+                    </div>
+                    <button type="button" class="btn-main" onclick="window.location.reload()" style="width: 100%;">
+                        NOVO ATENDIMENTO <i data-lucide="refresh-cw"></i>
+                    </button>
                 </div>
-                <button class="btn-main" onclick="window.location.reload()" style="margin-top:20px; width: 100%;">
-                    NOVO ATENDIMENTO <i data-lucide="refresh-cw"></i>
-                </button>
             `;
             lucide.createIcons();
         } else {
-            throw new Error(resultadoServidor.message || "Erro desconhecido");
+            throw new Error(resultadoServidor.message || "Erro desconhecido.");
         }
 
     } catch (erro) {
-        titulo.innerText = "Ops! Algo deu errado.";
+        titulo.innerText = "Aviso";
         container.innerHTML = `
-            <p style="color:red; text-align:center;">Não foi possível salvar a triagem no servidor. Código do erro: ${erro.message}</p>
-            <button class="btn-main" onclick="finalizarTriagem()" style="margin-top:20px; width: 100%;">TENTAR NOVAMENTE</button>
+            <div class="result-block-container" style="text-align:center; padding:20px;">
+                <p class="error-text" style="color:#ef4444; font-weight:600;">Não foi possível guardar a triagem no servidor.</p>
+                <p style="color: var(--gray-muted); font-size: 14px; margin-bottom: 20px;">Erro: ${erro.message}</p>
+                <button type="button" class="btn-main" onclick="finalizarTriagem()" style="width: 100%;">TENTAR NOVAMENTE <i data-lucide="alert-circle"></i></button>
+            </div>
         `;
-        lucide.createIcons();   
+        lucide.createIcons();
     }
 }
-
-window.goToPage = goToPage;
-window.irParaColeta = irParaColeta;
-window.finalizarTriagem = finalizarTriagem;

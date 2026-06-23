@@ -46,10 +46,14 @@ class PacientesController extends Controller
         $paciente->email = $request->email ?? $paciente->email;
         $paciente->antecedentes_pessoais = $request->antecedentes_pessoais ?? $paciente->antecedentes_pessoais;
         
-        // 1. Captura as respostas de triagem vindas do Totem (se houver)
-        $paciente->sintomas = $request->sintoma ?? $request->sintomas ?? json_encode($request->respostas_quiz) ?? $paciente->sintomas;
+        // Captura as respostas de triagem de forma segura com acentuação correta
+        if ($request->has('respostas_quiz')) {
+            $paciente->sintomas = json_encode($request->respostas_quiz, JSON_UNESCAPED_UNICODE);
+        } else {
+            $paciente->sintomas = $request->sintoma ?? $request->sintomas ?? $paciente->sintomas ?? null;
+        }
 
-        // 2. Calcula a urgência (Protocolo de Manchester) com base no score enviado pelo JS
+        // Calcula a urgência (Protocolo de Manchester) com base no score enviado pelo JS
         $score = $request->input('score_final');
         if ($score !== null) {
             $classificacao = "NÃO URGENTE (AZUL)";
@@ -71,7 +75,6 @@ class PacientesController extends Controller
 
             $paciente->urgencia = $classificacao;
         } else {
-            // Caso venha de um formulário tradicional
             $paciente->urgencia = $request->urgencia ?? $paciente->urgencia;
         }
 
@@ -79,14 +82,8 @@ class PacientesController extends Controller
             $paciente->protocolo = $request->protocolo;
         }
 
-        // Salva opcionalmente sinais vitais se as colunas existirem no seu banco:
-        // $paciente->bpm = $request->bpm;
-        // $paciente->spo2 = $request->spo2;
-        // $paciente->temperatura = $request->temp;
-
         $paciente->save();
 
-        // 3. A MÁGICA: Se a requisição pedir JSON (AJAX/Fetch), retorna JSON. Se for formulário, redireciona!
         if ($request->expectsJson() || $request->isJson()) {
             return response()->json([
                 'success' => true,

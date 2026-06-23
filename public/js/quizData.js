@@ -38,23 +38,23 @@ const quizData = {
     },
     perguntas: {
         'Falta de Ar': [
-            { text: "Você sente dificuldade para completar uma frase corta de forma falada por falta de ar?", score: 11, stopOnPositive: true },
-            { text: "Sua boca ou as pontas dos dedos estão ficando com uma cor azulada ou arroxeada?", score: 11, stopOnPositive: true },
-            { text: "Esse cansaço ou falta de ar está presente mesmo quando você está parado?", score: 8, stopOnPositive: false },
-            { text: "Essa falta de ar começou de maneira repentina e está piorando continuamente?", score: 5, stopOnPositive: false },
+            { text: "Você tem prouzido muito catarro e secreção acompanhado de dores na garganta?", score: 8, stopOnPositive: true },
+            { text: "Sua boca ou as pontas dos dedos estão ficando com uma cor azulada ou arroxeada?", score: 10, stopOnPositive: true },
+            { text: "Esse cansaço ou falta de ar está presente mesmo nas tarefas mais simples?", score: 5, stopOnPositive: false },
+            { text: "Essa falta de ar começou de maneira repentina e está piorando continuamente?", score: 4, stopOnPositive: false },
             { text: "A falta de ar é leve, mas vem acompanhada de tosse e coriza há alguns dias?", score: 3, stopOnPositive: false }
         ],
         'Asma / Chiado': [
-            { text: "Você está tão exausto pelo esforço para respirar que mal consegue responder a esta pergunta?", score: 11, stopOnPositive: true },
-            { text: "Seu peito começou a chiar de maneira muito rápida e agressiva nas últimas horas?", score: 8, stopOnPositive: false },
-            { text: "Você chegou a usar sua medicação ou bombinha em casa e mesmo assim o chiado não melhorou?", score: 5, stopOnPositive: false },
-            { text: "O chiado é leve e costuma aparecer apenas quando você faz algum esforço físico?", score: 3, stopOnPositive: false }
+            { text: "A falta de ar ou o chiado impediram você de realizar suas atividades comuns hoje no trabalho, escola ou em casa?", score: 7, stopOnPositive: false },
+            { text: "Você tem sentido falta de ar várias vezes ao dia, de forma constante e que está piorando?", score: 8, stopOnPositive: false },
+            { text: "Os sintomas da asma foram graves o suficiente para fazer você acordar assustado ou com falta de ar durante a noite?", score: 6, stopOnPositive: false },
+            { text: "Você precisou usar a bombinha de alívio repetidas vezes nas últimas horas ou dias porque o efeito passa rápido?", score: 5, stopOnPositive: false }
         ],
         'Tosse / Gripe': [
-            { text: "Você está tossindo sangue vivo em quantidade preocupante?", score: 11, stopOnPositive: true },
-            { text: "Você percebe que sua respiração está muito mais rápida do que o seu normal?", score: 8, stopOnPositive: false },
-            { text: "Você pertence a algum grupo prioritário ou de risco (idoso, asmático crônico ou cardiopata)?", score: 5, stopOnPositive: false },
-            { text: "Sua tosse é seca ou com catarro claro, sem apresentar febre ou falta de ar?", score: 3, stopOnPositive: false }
+            { text: "Você está sentindo falta de ar intensa mesmo estando em repouso ou ao fazer mínimos esforços?", score: 10, stopOnPositive: true },
+            { text: "Você ou seu acompanhante notaram tontura forte, sonolência excessiva ou confusão mental recente?", score: 10, stopOnPositive: true },
+            { text: "Você sente uma dor, aperto ou pressão persistente no peito que parece não passar?", score: 10, stopOnPositive: true },
+            { text: "Você notou se seus lábios, língua ou as pontas dos dedos estão com uma coloração azulada ou pálida?", score: 10, stopOnPositive: true }
         ],
         'Dor no Peito': [
             { text: "A sua dor no peito parece um aperto ou peso que se espalha para o braço esquerdo, queixo ou costas?", score: 11, stopOnPositive: true },
@@ -63,11 +63,10 @@ const quizData = {
             { text: "É uma dor em pontada leve que dura poucos segundos e desaparece sozinha?", score: 3, stopOnPositive: false }
         ],
         'Dor de Cabeça': [
-            { text: "Esta dor de cabeça começou de maneira repentina e é a pior dor que você já sentiu na vida?", score: 11, stopOnPositive: true },
-            { text: "Você sente uma rigidez ou dor incômoda na nuca ao tentar aproximar o queixo do peito?", score: 11, stopOnPositive: true },
-            { text: "A dor de cabeça veio acompanhada de febre alta ou forte sensibilidade à luz (fotofobia)?", score: 8, stopOnPositive: false },
-            { text: "Essa dor é crônica (recorrente), parecida com crises anteriores de enxaqueca?", score: 5, stopOnPositive: false },
-            { text: "É uma dor leve, associada a cansaço visual ou estresse do dia a dia?", score: 3, stopOnPositive: false }
+            { text: "A dor de cabeça começou de forma súbita e violenta, atingindo sua intensidade máxima em poucos minutos?", score: 10, stopOnPositive: true },
+            { text: "Você apresenta febre associada a pescoço rígido (dor ao dobrar a nuca) ou perda de peso inexplicável recente?", score: 9, stopOnPositive: false },
+            { text: "A dor veio acompanhada de fraqueza em um lado do corpo, fala enrolada, confusão mental ou perda súbita de visão?", score: 10, stopOnPositive: true },
+            { text: "Você tem mais de 50 anos e esta é a primeira vez na vida que apresenta uma dor de cabeça com essa intensidade?", score: 8, stopOnPositive: false }
         ],
         'Dor Abdominal': [
             { text: "A dor na sua barriga começou de forma súbita, é insuportável e ela parece dura ao toque como uma tábua?", score: 11, stopOnPositive: true },

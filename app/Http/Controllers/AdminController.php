@@ -2,79 +2,107 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pacientes; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
+    // Exibe a tela inicial do Admin (se logado)
     public function home()
     {
-        
-        $pacientes = Pacientes::get(); 
-
-        
-        return view('admin.home', compact('pacientes'));
+        return view('admin.home'); // certifique-se de enviar as variáveis do dashboard por aqui futuramente
     }
 
-    public function dashboard()
-    {
-        return view('admin.dashboard');
-    }
-    public function users()
-    {
-        return view('admin.users');
-    }
-    public function listar()
-    {
-        return view('admin.listar');
-    }
-    public function visaogeral()
-    {
-        return view('admin.visaogeral');
-    }
-    public function status_totens()
-    {
-        $totens = Totens::get();
-        return view('admin.status_totens', compact('totens'));
-    }
-    public function pacientes()
+    // Exibe a tela de Login
+    public function login()
+        {
+            // Se já estiver logado, manda para a home do admin
+            if (Auth::check()) {
+                return redirect()->route('admin.home');
+            }
+            
+            // Se NÃO estiver logado, apenas mostra a tela de login (sem redirecionar!)
+            return view('admin.login'); 
+        }
 
+    // Processa a tentativa de Login
+    public function loginPost(Request $request)
     {
-        $pacientes = Pacientes::get(); 
+        // 1. Validação dos dados informados
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ], [
+            'email.required' => 'O campo e-mail é obrigatório.',
+            'email.email' => 'Insira um formato de e-mail válido.',
+            'password.required' => 'A senha é obrigatória.',
+        ]);
 
-        
-        return view('admin.pacientes', compact('pacientes'));   
-        
+        $remember = $request->has('remember');
+
+        // 2. Tentativa de login
+        if (Auth::attempt($credentials, $remember)) {
+            // Regenera a sessão por segurança
+            $request->session()->regenerate();
+
+            // Redireciona para onde o usuário tentava ir, ou para a home do Admin
+            return redirect()->intended('/admin');
+        }
+
+        // 3. Se falhar, retorna com erro
+        return back()->withErrors([
+            'email' => 'As credenciais fornecidas não correspondem aos nossos registros.',
+        ])->withInput($request->only('email', 'remember'));
     }
-    public function alertas()
+
+    // Exibe a tela de Cadastro
+    public function cadastro()
     {
-        return view('admin.alertas');
+        return view('admin.cadastro');
+    }
+
+    // Processa a criação de um novo usuário administrador
+    public function cadastroPost(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:usuarios',
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'email.unique' => 'Este e-mail já está cadastrado no sistema.',
+            'password.confirmed' => 'As senhas informadas não coincidem.',
+            'password.min' => 'A senha deve conter no mínimo 8 caracteres.'
+        ]);
+
+        // Criação no banco usando o Model padrão do Laravel (User)
+        User::create([
+            'nome' => $request->nome,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('login')->with('success', 'Conta criada com sucesso! Faça o login.');
+    }
+
+    // Realiza o Logout
+    public function logout(Request $request)
+    {
+        // Desloga o usuário do Laravel
+        Auth::logout();
+
+        // Invalida a sessão atual do usuário
+        $request->session()->invalidate();
+
+        // Regenera o token CSRF para prevenir ataques de fixação de sessão
+        $request->session()->regenerateToken();
+
+        // Redireciona o usuário de volta para a tela de login com uma mensagem
+        return redirect()->route('login')->with('success', 'Sessão encerrada com sucesso.');
     }
     public function configuracoes()
     {
         return view('admin.configuracoes');
-    }
-    public function salvar(Request $request)
-    {
-        if ($request->id) {
-            $p = Pacientes::findOrFail($request->id);
-        } else {
-            $p = new Pacientes();
-        }
-        $p->nome = $request->nome;
-        $p->cpf = $request->cpf;
-        $p-> protocolo = $request->protocolo;
-        $p->idade = $request->idade;
-        $p->telefone = $request->telefone;
-        $p->status = 1;
-        $p->data_nascimento = $request->data_nascimento;
-        $p->sexo = $request->sexo;
-        $p->data_nascimento = $request->data_nascimento;
-        $p->sintomas = $request->sintoma;
-        $p->tipo_sanguineo = $request->tipo_sanguineo; 
-        $p->antecedentes_pessoais = $request->antecedentes_pessoais;
-          
-        $p->save();
-        return redirect("/admin/pacientes");
     }
 }

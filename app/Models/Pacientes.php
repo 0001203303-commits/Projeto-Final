@@ -8,6 +8,7 @@ class Pacientes extends Model
     protected $casts = [
         'sintomas' => 'array',
     ];
+    
 
 
 }
