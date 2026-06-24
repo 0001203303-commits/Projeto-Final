@@ -1,57 +1,302 @@
-/* --- Novas Classes Utilitárias e Abstrações de Layout --- */
-.mt-20 { margin-top: 20px; }
-.mt-30 { margin-top: 30px; }
-.justify-center { justify-content: center; }
-.animate-spin { animation: spin 1s linear infinite; }
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+/* --- CONFIGURAÇÕES GERAIS E VARIÁVEIS DO SISTEMA --- */
+:root {
+    --primary: #069494;
+    --primary-dark: #046c6c;
+    --primary-light: #f0fdf4;
+    --text-main: #1e293b;
+    --gray-muted: #64748b;
+    --border-color: #e2e8f0;
+    --bg-global: #f8fafc;
 }
 
-/* Customização Dinâmica das Subcategorias */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background-color: var(--bg-global);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* --- SISTEMA DE PÁGINAS (SPA - SINGLE PAGE APPLICATION) --- */
+.page {
+    display: none;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- TELA DE BOAS-VINDAS (WELCOME PAGE) --- */
+.welcome-bg {
+    background: linear-gradient(135deg, #046c6c 0%, #069494 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.welcome-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.welcome-card h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin-bottom: 16px;
+}
+
+.welcome-card p {
+    color: var(--gray-muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    font-size: 16px;
+}
+
+/* --- CABEÇALHOS (HEADERS) --- */
+.header-teal {
+    background-color: white;
+    border-bottom: 2px solid var(--border-color);
+    padding: 20px;
+    text-align: center;
+}
+
+.header-teal h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.5px;
+}
+
+/* --- CONTAINERS E LAYOUT ESTRUTURAL --- */
+.form-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.card-standard {
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* --- ELEMENTOS DE FORMULÁRIO E VALIDAÇÃO --- */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Asterisco vermelho para campos obrigatórios */
+.input-group label[for="nome"]::after,
+.input-group label[for="cpf"]::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    outline: none;
+    color: var(--text-main);
+}
+
+.input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(6, 148, 148, 0.15);
+}
+
+/* Classe visual de erro em inputs */
+.input-group input.field-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2;
+}
+.input-group input.field-error:focus {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+/* --- BOTÕES --- */
+.btn-main {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-main:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-secondary { 
+    background: #64748b !important; 
+}
+.btn-secondary:hover { 
+    background: #475569 !important; 
+}
+
+/* --- TELA DE SINAIS VITAIS (VITAL SENSORS) --- */
+.loader-container {
+    width: 100%;
+    max-width: 420px;
+    height: 8px;
+    background-color: #e2e8f0;
+    border-radius: 999px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.loader-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary);
+    transition: width 0.1s linear;
+}
+
+.vital-grid {
+    display: none; /* Inicia oculto até a leitura acabar */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 30px;
+    width: 100%;
+}
+
+/* Quando os sensores terminam, o JS exibe a grid trocando para display: grid */
+#final-results[style*="display: inline-flex"] {
+    display: grid !important; 
+}
+
+.vital-card {
+    padding: 20px 10px;
+    border-radius: 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.vital-value {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.vital-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* --- GRIDS E ESTRUTURAS DO QUIZ DE SINTOMAS --- */
+.quiz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.dual-column { 
+    grid-template-columns: 1fr 1fr; 
+    gap: 20px; 
+}
+
+/* CARDS DE SELEÇÃO COM CHECKBOX */
 .sub-card-checkbox {
     display: flex;
     align-items: center;
-    padding: 18px;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 14px;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 16px;
+    background: white;
+    gap: 15px;
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
 }
-.sub-card-checkbox.checked {
+
+.sub-card-checkbox:hover {
     border-color: var(--primary);
-    background: #f0fdf4;
+    background: var(--primary-light);
+    transform: scale(1.01);
 }
+
 .sub-card-checkbox input[type="checkbox"] {
-    width: 26px;
-    height: 26px;
-    margin-right: 15px;
-    cursor: pointer;
+    display: none; /* O JS já insere ocultando, mas reforçamos aqui */
 }
+
 .sub-card-checkbox label {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1e293b;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     width: 100%;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
     margin-bottom: 0;
 }
 
-/* Containers Dinâmicos do PainScale e Fluxos */
-.quiz-actions-container {
-    grid-column: 1 / -1;
-    display: flex;
-    gap: 15px;
-    margin-top: 25px;
+/* Classes Dinâmicas injetadas pelo JS (Item Selecionado) */
+.sub-card-checkbox.checked {
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light) !important;
+    box-shadow: 0 4px 12px rgba(6, 148, 148, 0.1);
 }
-.btn-secondary { background: #64748b !important; }
-.btn-flex-2 { flex: 2; }
 
+/* Cores de borda personalizadas para categorias do quizData.js */
+.cat-blue { border-color: #90cdf4; }
+.cat-red { border-color: #feb2b2; }
+.cat-orange { border-color: #fbd38d; }
+.cat-yellow { border-color: #faf089; }
+.cat-purple { border-color: #d6bcfa; }
+.cat-pink { border-color: #fbb6ce; }
+
+/* --- ESCALA DE DOR (PAIN SCALE) --- */
 .pain-scale-container {
     display: block;
     width: 100%;
@@ -71,12 +316,22 @@
 .pain-score-display.level-5, .pain-desc-display.level-5 { color: #fef08a; }
 .pain-score-display.level-6, .pain-desc-display.level-6 { color: #fed7aa; }
 .pain-score-display.level-7, .pain-desc-display.level-7 { color: #fdba74; }
-.pain-score-display.level-8, .pain-desc-display.level-8 { color: #f97316; }
+.pain-score-display.level-8, .pain-score-display.level-8 { color: #f97316; }
 .pain-score-display.level-9, .pain-desc-display.level-9 { color: #ef4444; }
 .pain-score-display.level-10, .pain-desc-display.level-10 { color: #b91c1c; }
 
-.dual-column { grid-template-columns: 1fr 1fr; gap: 20px; }
+/* --- BOTÕES E ELEMENTOS DINÂMICOS DO QUIZ --- */
+.quiz-actions-container {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 16px;
+    margin-top: 25px;
+    width: 100%;
+}
+.quiz-actions-container .btn-main { flex: 1; }
+.btn-flex-2 { flex: 2; }
 
+/* --- INTERFACES DE FINALIZAÇÃO E CARREGAMENTO --- */
 .loading-center-container {
     text-align: center;
     width: 100%;
@@ -90,63 +345,13 @@
 .result-block-container { display: block; width: 100%; }
 .result-user-info { text-align: center; font-size: 18px; margin-bottom: 20px; }
 .error-text { color: #ef4444; text-align: center; font-weight: 600; }
-/* --- ESTILIZAÇÃO DOS CARDS COM CHECKBOX (INTERSEÇÃO) --- */
-.sub-card-checkbox {
-    padding: 20px;
-    border: 2px solid var(--border-color);
-    border-radius: 16px;
-    background: white;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-}
 
-.sub-card-checkbox:hover {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    transform: scale(1.01);
-}
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+.justify-center { justify-content: center; }
+.animate-spin { animation: spin 1s linear infinite; }
 
-/* Esconde o input checkbox nativo feio */
-.sub-card-checkbox input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    margin-right: 5px;
-}
-
-/* Estilo do texto/label dentro do card */
-.sub-card-checkbox label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-main);
-    cursor: pointer;
-    margin-bottom: 0; /* Reseta margem padrão de labels */
-}
-
-/* Efeito visual de item selecionado/marcado */
-.sub-card-checkbox.checked {
-    border-color: var(--primary);
-    background-color: var(--primary-light);
-    box-shadow: 0 4px 12px rgba(6, 148, 148, 0.1);
-}
-
-/* Alinhamento dos botões inferiores */
-.quiz-actions-container {
-    grid-column: 1 / -1;
-    display: flex;
-    gap: 16px;
-    margin-top: 25px;
-    width: 100%;
-}
-
-.quiz-actions-container .btn-main {
-    flex: 1;
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }

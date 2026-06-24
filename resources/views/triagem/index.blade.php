@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{{ asset('css/triagem.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/triagem.css') }}?v={{ filemtime(public_path('css/triagem.css')) }}">
 </head>
 <body>
 
@@ -142,7 +142,7 @@
     </section>
 
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="{{ asset('js/quizData.js') }}"></script>
-    <script src="{{ asset('js/triagem.js') }}"></script>
+    <script src="{{ asset('js/quizData.js') }}?v={{ filemtime(public_path('js/quizData.js')) }}"></script>
+    <script src="{{ asset('js/triagem.js') }}?v={{ filemtime(public_path('js/triagem.js')) }}"></script>
 </body>
 </html>

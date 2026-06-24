@@ -31,61 +31,50 @@ class TriagemController extends Controller
     public function finalizar(Request $request)
     {
         try {
-            // 1. Extrai o score final enviado pelo Totem
-            $scoreFinal = intval($request->input('score_final', 0));
-
-            // 2. Processa os resumos das perguntas marcadas como 'Sim'
-            $sintomasTexto = '';
-            if (!empty($request->respostas_quiz) && is_array($request->respostas_quiz)) {
-                $sintomasTexto = collect($request->respostas_quiz)
-                    ->where('resposta', 'Sim')
-                    ->pluck('pergunta') // Captura o "summary" vindo do JavaScript
-                    ->implode(', ');
-            }
-
-            // Se o paciente não marcou nenhuma pergunta com 'Sim'
-            if (empty($sintomasTexto)) {
-                $sintomasTexto = "Nenhum sintoma de alerta selecionado no questionário.";
-            }
-
-            // 3. Define a classificação de risco com base no score (Manchester)
-            if ($scoreFinal >= 11) {
-                $classificacao = 'EMERGÊNCIA (Imediato)';
-                $corHex = '#ef4444'; // Vermelho
-                $status = 1;
-            } elseif ($scoreFinal >= 8) {
-                $classificacao = 'MUITO URGENTE (10 min)';
-                $corHex = '#f97316'; // Laranja
-                $status = 2;
-            } elseif ($scoreFinal >= 5) {
-                $classificacao = 'URGENTE (60 min)';
-                $corHex = '#eab308'; // Amarelo
-                $status = 3;
-            } else {
-                $classificacao = 'POUCO URGENTE (120 min)';
-                $corHex = '#22c55e'; // Verde
-                $status = 4;
-            }
-
-            // 4. Salva o registro do paciente no Banco de Dados
             $paciente = new Pacientes();
-            $paciente->nome = $request->input('nome', 'Paciente Sem Nome');
-            $paciente->cpf = $request->input('cpf');
-            $paciente->protocolo = 'TR-' . Str::random(13); // Gera um protocolo único (ex: TR-6a3054b40a641)
-            $paciente->status = $status;
+
+            $score = $request->input('score_final');
             
-            // Dados aferidos no Totem
-            $paciente->sintomas = $sintomasTexto; // O resumo curto e cirúrgico entra aqui
+            $classificacao = "NÃO URGENTE (AZUL)";
+            $corHex = "#3b82f6"; 
+
+            if ($score !== null) {
+                if ($score >= 11) {
+                    $classificacao = "EMERGÊNCIA (VERMELHO)";
+                    $corHex = "#ef4444";
+                } elseif ($score >= 8) {
+                    $classificacao = "MUITO URGENTE (LARANJA)";
+                    $corHex = "#f97316";
+                } elseif ($score >= 5) {
+                    $classificacao = "URGENTE (AMARELO)";
+                    $corHex = "#eab308";
+                } elseif ($score >= 3) {
+                    $classificacao = "POUCO URGENTE (VERDE)";
+                    $corHex = "#10b981";
+                }
+
+                $paciente->urgencia = $classificacao;
+            } else {
+                $paciente->urgencia = $request->input('urgencia', $classificacao);
+            }
+
+            $paciente->nome = $request->input('nome') ?? $request->input('dadosTriagem.nome') ?? 'Paciente Sem Nome';
+            $paciente->cpf = $request->input('cpf') ?? $request->input('dadosTriagem.cpf');
+            $paciente->protocolo = 'TR-' . Str::random(13);
             
-            // Opcional: Se sua tabela já possuir colunas para os sinais vitais isolados, salve-os aqui
-            // $paciente->bpm = $request->input('bpm');
-            // $paciente->spo2 = $request->input('spo2');
-            // $paciente->temp = $request->input('temp');
-            // $paciente->nivel_dor = $request->input('nivel_dor');
+            $paciente->status = $request->input('status', 1); 
+
+            if ($request->has('respostas_quiz')) {
+                $paciente->sintomas = json_encode($request->input('respostas_quiz'), JSON_UNESCAPED_UNICODE);
+            } else {
+                $paciente->sintomas = $request->input('sintomas') ?? $request->input('sintoma') ?? 'Nenhum sintoma relatado';
+            }
+            
+            $paciente->horario = now()->format('H:i');
+            $paciente->idade = $request->input('idade', 0);
 
             $paciente->save();
 
-            // 5. Retorna o JSON limpo que o seu JavaScript precisa para renderizar a tela de sucesso
             return response()->json([
                 'success' => true,
                 'classificacao' => $classificacao,
@@ -93,10 +82,9 @@ class TriagemController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // Em caso de erro no banco (como colunas faltando), responde como JSON prevenindo o erro '<'
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao salvar: ' . $e->getMessage()
+                'message' => 'Erro interno no servidor: ' . $e->getMessage()
             ], 500);
         }
     }

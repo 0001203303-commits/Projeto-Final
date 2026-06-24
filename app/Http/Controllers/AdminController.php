@@ -105,4 +105,8 @@ class AdminController extends Controller
     {
         return view('admin.configuracoes');
     }
+    public function alertas()
+    {
+        return view('admin.alertas');
+    }
 }

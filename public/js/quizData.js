@@ -36,101 +36,214 @@ const quizData = {
             { id: 'Sintomas Visuais', label: 'Visão embaçada ou com pontos brilhantes', icon: 'eye' }
         ]
     },
-    perguntas: {
-        'Falta de Ar': [
-            { text: "Você tem prouzido muito catarro e secreção acompanhado de dores na garganta?", score: 8, stopOnPositive: true },
-            { text: "Sua boca ou as pontas dos dedos estão ficando com uma cor azulada ou arroxeada?", score: 10, stopOnPositive: true },
-            { text: "Esse cansaço ou falta de ar está presente mesmo nas tarefas mais simples?", score: 5, stopOnPositive: false },
-            { text: "Essa falta de ar começou de maneira repentina e está piorando continuamente?", score: 4, stopOnPositive: false },
-            { text: "A falta de ar é leve, mas vem acompanhada de tosse e coriza há alguns dias?", score: 3, stopOnPositive: false }
-        ],
-        'Asma / Chiado': [
-            { text: "A falta de ar ou o chiado impediram você de realizar suas atividades comuns hoje no trabalho, escola ou em casa?", score: 7, stopOnPositive: false },
-            { text: "Você tem sentido falta de ar várias vezes ao dia, de forma constante e que está piorando?", score: 8, stopOnPositive: false },
-            { text: "Os sintomas da asma foram graves o suficiente para fazer você acordar assustado ou com falta de ar durante a noite?", score: 6, stopOnPositive: false },
-            { text: "Você precisou usar a bombinha de alívio repetidas vezes nas últimas horas ou dias porque o efeito passa rápido?", score: 5, stopOnPositive: false }
-        ],
-        'Tosse / Gripe': [
-            { text: "Você está sentindo falta de ar intensa mesmo estando em repouso ou ao fazer mínimos esforços?", score: 10, stopOnPositive: true },
-            { text: "Você ou seu acompanhante notaram tontura forte, sonolência excessiva ou confusão mental recente?", score: 10, stopOnPositive: true },
-            { text: "Você sente uma dor, aperto ou pressão persistente no peito que parece não passar?", score: 10, stopOnPositive: true },
-            { text: "Você notou se seus lábios, língua ou as pontas dos dedos estão com uma coloração azulada ou pálida?", score: 10, stopOnPositive: true }
-        ],
-        'Dor no Peito': [
-            { text: "A sua dor no peito parece um aperto ou peso que se espalha para o braço esquerdo, queixo ou costas?", score: 11, stopOnPositive: true },
-            { text: "Você percebeu a presença de suor frio ou forte tontura acompanhando essa dor no peito?", score: 11, stopOnPositive: true },
-            { text: "A dor piora muito profundamente quando você respira fundo ou quando aperta o osso do peito?", score: 5, stopOnPositive: false },
-            { text: "É uma dor em pontada leve que dura poucos segundos e desaparece sozinha?", score: 3, stopOnPositive: false }
-        ],
-        'Dor de Cabeça': [
-            { text: "A dor de cabeça começou de forma súbita e violenta, atingindo sua intensidade máxima em poucos minutos?", score: 10, stopOnPositive: true },
-            { text: "Você apresenta febre associada a pescoço rígido (dor ao dobrar a nuca) ou perda de peso inexplicável recente?", score: 9, stopOnPositive: false },
-            { text: "A dor veio acompanhada de fraqueza em um lado do corpo, fala enrolada, confusão mental ou perda súbita de visão?", score: 10, stopOnPositive: true },
-            { text: "Você tem mais de 50 anos e esta é a primeira vez na vida que apresenta uma dor de cabeça com essa intensidade?", score: 8, stopOnPositive: false }
-        ],
-        'Dor Abdominal': [
-            { text: "A dor na sua barriga começou de forma súbita, é insuportável e ela parece dura ao toque como uma tábua?", score: 11, stopOnPositive: true },
-            { text: "A dor na sua barriga está tão intensa que impede você de caminhar com o corpo ereto?", score: 8, stopOnPositive: false },
-            { text: "Ao tocar na sua barriga, você sente que a região está visivelmente endurecida ou muito dolorida?", score: 5, stopOnPositive: false },
-            { text: "A dor abdominal é acompanhada de febre baixa ou náuseas leves?", score: 5, stopOnPositive: false },
-            { text: "Trata-se de uma cólica leve ou desconforto após a ingestão de algum alimento específico?", score: 3, stopOnPositive: false }
-        ],
-        'Quedas': [
-            { text: "Após a queda, você desmaiou, ficou inconsciente por algum tempo ou teve uma convulsão?", score: 11, stopOnPositive: true },
-            { text: "Você bateu a cabeça e passou a sentir enjoo persistente ou tontura após o impacto?", score: 8, stopOnPositive: false },
-            { text: "Houve sangramento no couro cabeludo que já parou após fazer pressão?", score: 5, stopOnPositive: false },
-            { text: "A queda causou apenas um hematoma ('galo') ou dor leve local, sem outros sintomas?", score: 3, stopOnPositive: false }
-        ],
-        'Fraturas': [
-            { text: "Existe algum osso exposto (fratura exposta) ou o membro machucado está sem pulso, frio ou ficando roxo?", score: 11, stopOnPositive: true },
-            { text: "O local machucado apresenta algum desalinhamento visível ou incapacidade total de movimento?", score: 8, stopOnPositive: false },
-            { text: "O local está muito inchado e dolorido, mas você ainda consegue mexer os dedos com dificuldade?", score: 5, stopOnPositive: false },
-            { text: "Trata-se apenas de uma torção leve, com dor suportável e sem deformidades?", score: 3, stopOnPositive: false }
-        ],
-        'Cortes': [
-            { text: "O ferimento está jorrando sangue de forma pulsante ou não para de sangrar mesmo pressionando com força?", score: 11, stopOnPositive: true },
-            { text: "O corte é profundo, você consegue ver tecidos internos (gordura/músculo) e precisa de pontos?", score: 8, stopOnPositive: false },
-            { text: "O ferimento continua sangrando de maneira lenta e constante, mesmo após você pressionar o local?", score: 5, stopOnPositive: false },
-            { text: "É um arranhão superficial ou corte pequeno que já parou de sangrar por completo?", score: 3, stopOnPositive: false }
-        ],
-        'Febre': [
-            { text: "A febre está acompanhada de confusão mental, sonolência profunda ou manchas vermelhas/roxas pelo corpo?", score: 11, stopOnPositive: true },
-            { text: "O paciente é um bebê com menos de 3 meses de vida apresentando febre medida?", score: 8, stopOnPositive: false },
-            { text: "Sua febre continua alta mesmo depois de você ter tomado remédios antitérmicos comuns?", score: 5, stopOnPositive: false },
-            { text: "Você tem um estado febril leve (abaixo de 38°C) que melhora logo após tomar medicamento?", score: 3, stopOnPositive: false }
-        ],
-        'Vômitos': [
-            { text: "Você está vomitando sangue escuro (parecendo borra de café) ou conteúdo com odor de fezes?", score: 11, stopOnPositive: true },
-            { text: "Você apresenta sinais de desidratação severa (boca totalmente seca, muita fraqueza e está sem urinar)?", score: 8, stopOnPositive: false },
-            { text: "Você apresentou episódios muito frequentes de vômito e não consegue reter nenhum líquido na barriga?", score: 5, stopOnPositive: false },
-            { text: "Teve poucos episódios de vômito ou diarreia, mas consegue se hidratar com soro ou água?", score: 3, stopOnPositive: false }
-        ],
-        'Tontura': [
-            { text: "A tontura surgiu junto com dor no peito, falta de ar ou palpitações fortes no coração?", score: 11, stopOnPositive: true },
-            { text: "A tontura fez você desmaiar de verdade ou perder a consciência por alguns segundos?", score: 8, stopOnPositive: false },
-            { text: "A tontura causa uma perda real de equilíbrio, impedindo que você caminhe com segurança?", score: 5, stopOnPositive: false },
-            { text: "Você sente uma tontura leve apenas quando se levanta rápido demais da cama ou da cadeira?", score: 3, stopOnPositive: false }
-        ],
-        'AVC / Derrame': [
-            { text: "Essa sensação de fraqueza, formigamento ou paralisia começou de forma súbita nas últimas horas?", score: 11, stopOnPositive: true },
-            { text: "Você está percebendo alguma dificuldade incomum para pronunciar palavras simples ou compreender os outros neste momento?", score: 11, stopOnPositive: true },
-            { text: "Ao sorrir no espelho, você percebeu que um lado do seu rosto está caído ou a boca torta?", score: 11, stopOnPositive: true },
-            { text: "Você sente uma perda súbita de coordenação motora ou incapacidade de segurar um objeto leve com uma das mãos?", score: 11, stopOnPositive: true }
-        ],
-        'Dores / Contrações': [
-            { text: "Você está grávida e apresenta sangramento vaginal abundante ou perda de líquido escuro/com odor forte?", score: 11, stopOnPositive: true },
-            { text: "Você está com dor de cabeça muito forte, visão borrada e pressão alta nesta fase final da gestação?", score: 11, stopOnPositive: true },
-            { text: "Suas contrações estão acontecendo de maneira regular, em intervalos menores do que 5 minutos?", score: 8, stopOnPositive: false },
-            { text: "Você sente as famosas contrações de treinamento (esporádicas, irregulares e de baixa intensidade)?", score: 3, stopOnPositive: false }
-        ],
-        'Sintomas Visuais': [
-            { text: "Você sofreu uma perda total e repentina da visão em um ou em ambos os olhos?", score: 11, stopOnPositive: true },
-            { text: "Além das alterações na visão, você está sentindo uma dor de cabeça avassaladora?", score: 11, stopOnPositive: true },
-            { text: "Você sofreu algum trauma químico direto (respingo de produto de limpeza ou ácido) nos olhos?", score: 8, stopOnPositive: false },
-            { text: "Você está percebendo uma visão embaçada, dupla ou com pontos brilhantes de forma persistentemente?", score: 5, stopOnPositive: false },
-            { text: "Seus olhos estão vermelhos, coçando ou lacrimejando, sem alteração na qualidade da visão?", score: 3, stopOnPositive: false }
-        ]
-    }
-};
+    perguntas : {
 
+'Falta de Ar': [
+    {
+        text: "Você está sentindo falta de ar mesmo parado(a) ou falando normalmente?",
+        score: 10,
+        stopOnPositive: true
+    },
+    {
+        text: "A falta de ar começou hoje e está piorando rapidamente?",
+        score: 8,
+        stopOnPositive: false
+    },
+    {
+        text: "Você percebe dificuldade para respirar ao caminhar pequenas distâncias?",
+        score: 6,
+        stopOnPositive: false
+    },
+    {
+        text: "Está com tosse, nariz entupido ou sintomas gripais junto com a falta de ar?",
+        score: 4,
+        stopOnPositive: false
+    },
+    {
+        text: "A sensação é leve e aparece somente em esforços maiores?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Asma / Chiado': [
+    {
+        text: "Você está com dificuldade para falar frases completas por causa da respiração?",
+        score: 10,
+        stopOnPositive: true
+    },
+    {
+        text: "Usou sua medicação habitual e não percebeu melhora?",
+        score: 8,
+        stopOnPositive: false
+    },
+    {
+        text: "O chiado está atrapalhando dormir ou fazer atividades normais?",
+        score: 6,
+        stopOnPositive: false
+    },
+    {
+        text: "Está apenas com chiado leve e conseguindo respirar normalmente?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Tosse / Sintomas Respiratórios': [
+    {
+        text: "Sua tosse está acompanhada de dificuldade para respirar ou dor ao respirar?",
+        score: 8,
+        stopOnPositive: true
+    },
+    {
+        text: "Está eliminando catarro em grande quantidade?",
+        score: 6,
+        stopOnPositive: false
+    },
+    {
+        text: "A tosse está atrapalhando dormir ou atividades normais?",
+        score: 4,
+        stopOnPositive: false
+    },
+    {
+        text: "São sintomas leves de gripe ou resfriado?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Dor no Peito': [
+    {
+        text: "A dor começou de repente e veio com falta de ar, suor frio ou mal-estar?",
+        score: 10,
+        stopOnPositive: true
+    },
+    {
+        text: "A dor parece pressão, aperto ou peso no peito?",
+        score: 8,
+        stopOnPositive: false
+    },
+    {
+        text: "A dor piora quando movimenta o corpo ou toca no local?",
+        score: 5,
+        stopOnPositive: false
+    },
+    {
+        text: "É uma dor leve e passageira sem outros sintomas?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Dor de Cabeça': [
+    {
+        text: "A dor começou de forma muito intensa ou diferente do habitual?",
+        score: 9,
+        stopOnPositive: true
+    },
+    {
+        text: "Está junto com febre, náusea ou dificuldade para olhar luz?",
+        score: 7,
+        stopOnPositive: false
+    },
+    {
+        text: "Você já teve dores parecidas anteriormente?",
+        score: 4,
+        stopOnPositive: false
+    },
+    {
+        text: "A dor é leve e não impede suas atividades?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Dor Abdominal': [
+    {
+        text: "A dor está muito forte e impede andar ou ficar em pé normalmente?",
+        score: 9,
+        stopOnPositive: true
+    },
+    {
+        text: "Está junto com vômitos frequentes ou dificuldade para se alimentar?",
+        score: 7,
+        stopOnPositive: false
+    },
+    {
+        text: "A dor piora após comer ou se movimentar?",
+        score: 5,
+        stopOnPositive: false
+    },
+    {
+        text: "É um desconforto leve sem outros sintomas?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Febre': [
+    {
+        text: "Está com febre acompanhada de muito cansaço ou dificuldade para respirar?",
+        score: 8,
+        stopOnPositive: true
+    },
+    {
+        text: "A febre permanece por mais de dois dias?",
+        score: 6,
+        stopOnPositive: false
+    },
+    {
+        text: "Está conseguindo beber líquidos normalmente?",
+        score: 4,
+        stopOnPositive: false
+    },
+    {
+        text: "A febre melhora com repouso ou medicação habitual?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Vômitos': [
+    {
+        text: "Você está conseguindo beber líquidos sem vomitar?",
+        score: 8,
+        stopOnPositive: false
+    },
+    {
+        text: "Os vômitos estão acontecendo várias vezes no mesmo dia?",
+        score: 6,
+        stopOnPositive: false
+    },
+    {
+        text: "Está sentindo boca seca ou urinando menos que o normal?",
+        score: 5,
+        stopOnPositive: false
+    },
+    {
+        text: "Foi apenas um episódio isolado?",
+        score: 2,
+        stopOnPositive: false
+    }
+],
+
+'Tontura': [
+    {
+        text: "Você sente que pode cair ou desmaiar?",
+        score: 8,
+        stopOnPositive: true
+    },
+    {
+        text: "A tontura começou junto com palpitação ou falta de ar?",
+        score: 8,
+        stopOnPositive: false
+    },
+    {
+        text: "A tontura aparece ao levantar rapidamente?",
+        score: 3,
+        stopOnPositive: false
+    }
+]
+
+};
 window.quizData = quizData;

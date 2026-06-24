@@ -84,7 +84,7 @@ class PacientesController extends Controller
 
         $paciente->save();
 
-        if ($request->expectsJson() || $request->isJson()) {
+        if ($request->expectsJson() || $request->isJson()|| $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'classificacao' => $paciente->urgencia,

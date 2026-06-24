@@ -20,6 +20,7 @@ const AppState = {
 document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     
+    // 1. Formatação e Máscara do CPF em tempo real
     const cpfInput = document.getElementById('cpf');
     if (cpfInput) {
         cpfInput.addEventListener('input', (e) => {
@@ -42,6 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
             }
         });
+    }
+
+    // 2. Intercepção Obrigatória do Avanço de Cadastro
+    // Procura o formulário ou o botão de avançar da página de cadastro para vincular a validação
+    const cadastroForm = document.querySelector('#page-cadastro form');
+    if (cadastroForm) {
+        cadastroForm.addEventListener('submit', irParaColeta);
+    } else {
+        // Caso seu HTML use um botão com ID ou classe em vez de uma tag <form>
+        const btnAvancarCadastro = document.querySelector('#page-cadastro .btn-main');
+        if (btnAvancarCadastro) {
+            btnAvancarCadastro.onclick = irParaColeta;
+        }
     }
 });
 
@@ -117,7 +131,7 @@ function simularSensores() {
     }, 100);
 }
 
-// PASSO 1 DO QUIZ: Escolha de múltiplas categorias (Interseção)
+
 function renderCategories() {
     AppState.selectedSubcategories = [];
     AppState.questionsToAsk = [];
@@ -150,7 +164,7 @@ function renderCategories() {
             if (e.target !== checkbox) {
                 checkbox.checked = !checkbox.checked;
             }
-            wrapper.classList.toggle('checked', checkbox.checked);
+            wrapper.classList.toggle('checked', checkbox.checked)
         };
 
         container.appendChild(wrapper);
