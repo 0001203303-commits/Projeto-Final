@@ -43,6 +43,8 @@
                 @endforeach
             </tbody>
         </table>
+        <button class="btn btn-primary" onclick="window.location.reload();">Atualizar</button>
+        <button class="btn btn-secondary" onclick="window.location.href='{{ route('TotemController.criar) }}';">Adicionar Totem</button>
     </div>
 </main>
 

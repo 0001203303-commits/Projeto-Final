@@ -34,4 +34,9 @@ class TotemController extends Controller
         $totens = Totens::get();
         return view('admin.status_totens', compact('totens'));
     }
+    public function criar()
+    {
+
+        return view('admin.criar_totem');
+    }
 }
