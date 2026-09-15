@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartTriage - Cadastro</title>
-    
+
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             --brand-gradient: linear-gradient(135deg, #008080 0%, #09746b 100%);
-            --primary: #008080; --secondary: #0f172a; --success: #10b981;
-            --warning: #f59e0b; --danger: #ef4444; --bg-main: #f8fafc;
-            --text-main: #1e293b; --text-muted: #64748b; --border: #e2e8f0;
-            --radius: 16px; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --primary: #008080;
+            --secondary: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
-            --radius-lg: 20px; --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-md: 12px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { display: flex; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            display: flex;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
         .login-wrapper {
             display: flex;
             align-items: center;
@@ -29,7 +51,7 @@
             padding: 20px;
             background-color: var(--bg-main);
         }
-        
+
         .login-container {
             width: 100%;
             max-width: 440px;
@@ -50,6 +72,7 @@
             gap: 12px;
             color: var(--secondary);
         }
+
         .login-logo i {
             background: var(--brand-gradient);
             padding: 10px;
@@ -59,18 +82,23 @@
             align-items: center;
             justify-content: center;
         }
-        .login-logo span { color: #15CEC2; }
+
+        .login-logo span {
+            color: #15CEC2;
+        }
 
         .login-header {
             text-align: center;
             margin-bottom: 25px;
         }
+
         .login-header h2 {
             font-size: 22px;
             font-weight: 700;
             color: var(--secondary);
             margin-bottom: 8px;
         }
+
         .login-header p {
             color: var(--text-muted);
             font-size: 14px;
@@ -87,6 +115,7 @@
             align-items: center;
             gap: 8px;
         }
+
         .alert-error {
             background-color: #fef2f2;
             border: 1px solid #fee2e2;
@@ -99,11 +128,13 @@
             gap: 8px;
             margin-bottom: 20px;
         }
+
         .form-group label {
             font-size: 13px;
             font-weight: 600;
             color: var(--text-muted);
         }
+
         .form-group input {
             padding: 14px 16px;
             border-radius: var(--radius-md);
@@ -115,6 +146,7 @@
             transition: var(--transition);
             outline: none;
         }
+
         .form-group input:focus {
             border-color: var(--primary);
             background: white;
@@ -135,12 +167,14 @@
             border: none;
             transition: var(--transition);
         }
+
         .btn-primary {
             background: var(--brand-gradient);
             color: white;
             box-shadow: 0 4px 12px rgba(0, 128, 128, 0.2);
             margin-bottom: 20px;
         }
+
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 128, 128, 0.3);
@@ -152,22 +186,25 @@
             font-weight: 600;
             color: var(--text-muted);
         }
+
         .login-footer a {
             color: var(--primary);
             text-decoration: none;
             transition: var(--transition);
         }
+
         .login-footer a:hover {
             color: #09746b;
             text-decoration: underline;
         }
     </style>
 </head>
+
 <body>
 
     <div class="login-wrapper">
         <div class="login-container">
-            
+
             <div class="login-logo">
                 <i data-lucide="activity"></i>
                 Smart<span>Triage</span>
@@ -188,12 +225,14 @@
             <form action="{{ route('cadastro.post') }}" method="POST">
                 @csrf <div class="form-group">
                     <label for="nome">Nome completo</label>
-                    <input type="text" id="nome" name="nome" placeholder="Ex: João Silva" value="{{ old('nome') }}" required>
+                    <input type="text" id="nome" name="nome" placeholder="Ex: João Silva" value="{{ old('nome') }}"
+                        required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">E-mail corporativo</label>
-                    <input type="email" id="email" name="email" placeholder="nome@empresa.com" value="{{ old('email') }}" required>
+                    <input type="email" id="email" name="email" placeholder="nome@empresa.com"
+                        value="{{ old('email') }}" required>
                 </div>
 
                 <div class="form-group">
@@ -203,7 +242,8 @@
 
                 <div class="form-group">
                     <label for="password_confirmation">Confirme a senha</label>
-                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Repita a senha" required>
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                        placeholder="Repita a senha" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
@@ -223,4 +263,5 @@
         lucide.createIcons();
     </script>
 </body>
+
 </html>

@@ -36,7 +36,7 @@ class PacientesController extends Controller
         $paciente->cpf = $request->cpf ?? $paciente->cpf;
         $paciente->idade = $request->idade ?? $paciente->idade;
         $paciente->horario = $request->horario ?? $paciente->horario ?? now()->format('H:i');
-        $paciente->status = $paciente->status ?? 1;
+        //$paciente->status = $paciente->status ?? 1;
         
         $paciente->tipo_sanguineo = $request->tipo_sanguineo ?? $paciente->tipo_sanguineo;
         $paciente->data_nascimento = $request->data_nascimento ?? $paciente->data_nascimento;
@@ -94,6 +94,42 @@ class PacientesController extends Controller
         }
 
         return redirect("/admin/pacientes")->with('success', 'Paciente processado com sucesso!');
+    }
+
+    public function atualizar(Request $request, $id)
+    {
+        $paciente = Pacientes::findOrFail($id);
+
+        $dados = $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'cpf' => ['required', 'string', 'max:255'],
+            'protocolo' => ['required', 'string', 'max:255'],
+            'telefone' => ['nullable', 'string', 'max:255'],
+            'data_nascimento' => ['nullable', 'string', 'max:255'],
+            'idade' => ['nullable', 'string', 'max:255'],
+            'sexo' => ['nullable', 'string', 'max:255'],
+            'tipo_sanguineo' => ['nullable', 'string', 'max:255'],
+            'urgencia' => ['nullable', 'string', 'max:255'],
+            'sintoma' => ['nullable', 'string'],
+            'antecedentes_pessoais' => ['nullable', 'string'],
+        ]);
+
+        $paciente->fill([
+            'nome' => $dados['nome'],
+            'cpf' => $dados['cpf'],
+            'protocolo' => $dados['protocolo'],
+            'telefone' => $dados['telefone'] ?? null,
+            'data_nascimento' => $dados['data_nascimento'] ?? null,
+            'idade' => $dados['idade'] ?? null,
+            'sexo' => $dados['sexo'] ?? null,
+            'tipo_sanguineo' => $dados['tipo_sanguineo'] ?? null,
+            'urgencia' => $dados['urgencia'] ?? null,
+            'sintomas' => $dados['sintoma'] ?? null,
+            'antecedentes_pessoais' => $dados['antecedentes_pessoais'] ?? null,
+        ]);
+        $paciente->save();
+
+        return redirect('/admin/pacientes')->with('success', 'Paciente atualizado com sucesso.');
     }
     
     public function deletar($id)

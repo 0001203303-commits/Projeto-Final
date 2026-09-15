@@ -40,6 +40,8 @@ class AdminController extends Controller
             'password.required' => 'A senha é obrigatória.',
         ]);
 
+        $credentials['email'] = strtolower(trim($credentials['email']));
+
         $remember = $request->has('remember');
 
         // 2. Tentativa de login
@@ -76,10 +78,9 @@ class AdminController extends Controller
             'password.min' => 'A senha deve conter no mínimo 8 caracteres.'
         ]);
 
-        // Criação no banco usando o Model padrão do Laravel (User)
         User::create([
             'nome' => $request->nome,
-            'email' => $request->email,
+            'email' => strtolower($request->email),
             'password' => Hash::make($request->password),
         ]);
 

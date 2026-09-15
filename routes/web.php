@@ -33,12 +33,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/configuracoes', [AdminController::class, 'configuracoes']);
 
     Route::get('/pacientes', [PacientesController::class, 'index']);
+    Route::put('/pacientes/{id}', [PacientesController::class, 'atualizar'])->name('pacientes.atualizar');
     Route::get('/status_totens', [TotemController::class, 'status_totens']); 
 
     // Removida daqui a rota pacientes.salvar
 
     Route::get('/pacientes/deletar/{id}', [PacientesController::class, 'deletar'])->name('pacientes.deletar');
-
+    Route ::get('/status_totens/criar/',[TotemController::class, 'criar']) ->name('totens.criar');
     Route::post('/triagem/finalizar', [TriagemController::class, 'finalizar'])->name('triagem.finalizar');
     Route::get('/triagem/finalizar/{id}', [TriagemController::class, 'finalizar'])->name('triagem.finalizar.get');
     
