@@ -65,7 +65,12 @@ class TriagemController extends Controller
             $paciente->status = $request->input('status', 1); 
 
             if ($request->has('respostas_quiz')) {
-                $paciente->sintomas = json_encode($request->input('respostas_quiz'), JSON_UNESCAPED_UNICODE);
+                    $respostasConfirmadas = array_values(array_filter(
+                        $request->input('respostas_quiz'),
+                        fn ($resposta) => strtolower(trim($resposta['resposta'] ?? '')) === 'sim'
+                    ));
+
+                    $paciente->sintomas = json_encode($respostasConfirmadas, JSON_UNESCAPED_UNICODE);
             } else {
                 $paciente->sintomas = $request->input('sintomas') ?? $request->input('sintoma') ?? 'Nenhum sintoma relatado';
             }

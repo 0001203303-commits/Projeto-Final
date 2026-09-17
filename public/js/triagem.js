@@ -425,6 +425,7 @@ async function finalizarTriagem() {
                 <div class="result-block-container" style="text-align: center; padding: 20px;">
                     <p class="result-user-info" style="font-size:16px; margin-bottom: 20px;">
                         Paciente: <strong>${AppState.dadosTriagem.nome}</strong><br>
+                        Protocolo: <strong>${resultadoServidor.protocolo}</strong><br>
                         A sua classificação de risco foi calculada com sucesso pelo sistema.
                     </p>
                     <div class="result-badge" style="background-color: ${resultadoServidor.cor_hex || '#64748b'}; padding: 15px; border-radius:8px; color:white; font-weight:bold; font-size:18px; margin-bottom:20px;">

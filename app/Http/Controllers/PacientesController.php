@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pacientes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PacientesController extends Controller
 {
@@ -48,7 +49,12 @@ class PacientesController extends Controller
         
         // Captura as respostas de triagem de forma segura com acentuação correta
         if ($request->has('respostas_quiz')) {
-            $paciente->sintomas = json_encode($request->respostas_quiz, JSON_UNESCAPED_UNICODE);
+                $respostasConfirmadas = array_values(array_filter(
+                    $request->respostas_quiz,
+                    fn ($resposta) => strtolower(trim($resposta['resposta'] ?? '')) === 'sim'
+                ));
+
+                $paciente->sintomas = json_encode($respostasConfirmadas, JSON_UNESCAPED_UNICODE);
         } else {
             $paciente->sintomas = $request->sintoma ?? $request->sintomas ?? $paciente->sintomas ?? null;
         }
@@ -82,6 +88,10 @@ class PacientesController extends Controller
             $paciente->protocolo = $request->protocolo;
         }
 
+        if (!$paciente->protocolo) {
+            $paciente->protocolo = 'TR-' . Str::upper(Str::random(13));
+        }
+
         $paciente->save();
 
         if ($request->expectsJson() || $request->isJson()|| $request->ajax()) {
@@ -89,6 +99,7 @@ class PacientesController extends Controller
                 'success' => true,
                 'classificacao' => $paciente->urgencia,
                 'cor_hex' => $corHex ?? '#3b82f6',
+                'protocolo' => $paciente->protocolo,
                 'message' => 'Paciente processado com sucesso!'
             ]);
         }

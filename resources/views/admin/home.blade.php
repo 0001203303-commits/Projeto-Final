@@ -16,34 +16,36 @@
     <section class="cards-grid">
         <div class="card">
             <h3>Triagens Hoje</h3>
-            <div class="value"><?php echo $total_triagens ?? 0; ?></div>
-            <div class="indicator" style="color: var(--success)"><i data-lucide="trending-up"></i> +12.5%</div>
+            <div class="value">{{ $total_triagens ?? 0 }}</div>
         </div>
         <div class="card">
             <h3>Tempo Médio</h3>
-            <div class="value"><?php echo $tempo_medio ?? 0; ?> <small style="font-size: 14px; color: var(--text-muted)">min</small></div>
-            <div class="indicator" style="color: var(--success)"><i data-lucide="check-circle"></i> Dentro da meta</div>
+            <div class="value">{{ $tempo_medio ?? 'N/D' }} @if($tempo_medio)<small
+            style="font-size: 14px; color: var(--text-muted)">min</small>@endif</div>
         </div>
         <div class="card">
             <h3>Terminais Ativos</h3>
-            <div class="value"><?php echo $terminais_ativos ?? 0; ?> <span style="font-size: 18px; color: var(--text-muted)">/ 08</span></div>
+            <div class="value">{{ $terminais_ativos ?? 0 }} <span style="font-size: 18px; color: var(--text-muted)">/
+                    {{ $total_terminais ?? 0 }}</span></div>
         </div>
         <div class="card">
             <h3>Alertas Críticos</h3>
-            <div class="value" style="color: var(--danger)"><?php echo $alertas_criticos ?? 0; ?></div>
+            <div class="value" style="color: var(--danger)">{{ $alertas_criticos ?? 0 }}</div>
         </div>
     </section>
 
     <div class="dashboard-row">
         <section class="section-box">
-            <div class="section-title"><i data-lucide="bar-chart-3" style="color: var(--primary)"></i> Fluxo de Triagem (24h)</div>
+            <div class="section-title"><i data-lucide="bar-chart-3" style="color: var(--primary)"></i> Fluxo de Triagem
+                (24h)</div>
             <div class="chart-container">
                 <canvas id="graficoTriagem"></canvas>
             </div>
         </section>
 
         <section class="section-box">
-            <div class="section-title"><i data-lucide="server" style="color: var(--primary)"></i> Status dos Terminais</div>
+            <div class="section-title"><i data-lucide="server" style="color: var(--primary)"></i> Status dos Terminais
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -53,23 +55,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    if (isset($res_totens) && mysqli_num_rows($res_totens) > 0) {
-                        while($totem = mysqli_fetch_assoc($res_totens)) {
-                            $classe = ($totem['status'] == 'ONLINE') ? 'badge-online' : 'badge-offline';
-                            echo "<tr>
-                                    <td><strong>{$totem['localizacao']}</strong></td>
-                                    <td>{$totem['insumo']}%</td>
-                                    <td><span class='badge {$classe}'>● {$totem['status']}</span></td>
-                                  </tr>";
-                        }
-                    } else {
-                        // Linhas de simulação caso sua query de banco ainda não esteja injetada na rota do Laravel
-                        echo "<tr><td>Recepção Principal</td><td>85%</td><td><span class='badge badge-online'>● ONLINE</span></td></tr>";
-                        echo "<tr><td>Triagem Infantil</td><td>12%</td><td><span class='badge badge-online'>● ONLINE</span></td></tr>";
-                        echo "<tr><td>Corredor B</td><td>0%</td><td><span class='badge badge-offline'>● OFFLINE</span></td></tr>";
-                    }
-                    ?>
+                    @forelse($totens ?? [] as $totem)
+                    @php($classe = $totem->status === 'ONLINE' ? 'badge-online' : 'badge-offline')
+                    <tr>
+                        <td><strong>{{ $totem->nome ?: 'Totem #' . $totem->id }}</strong></td>
+                        <td>N/D</td>
+                        <td><span class="badge {{ $classe }}">{{ $totem->status ?: 'SEM STATUS' }}</span></td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="3">Nenhum totem cadastrado.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </section>
@@ -93,14 +90,15 @@
 
         // Renderização do gráfico de fluxo
         const ctx = document.getElementById('graficoTriagem').getContext('2d');
-        
+
         // Evita erro caso a variável vinda do controller não exista
-        const dadosGrafico = <?php echo json_encode($dados_grafico ?? [12, 19, 3, 5, 2, 3, 10]); ?>;
+        const dadosGrafico = @json($dados_grafico ?? []);
+        const rotulosGrafico = @json($rotulos_grafico ?? []);
 
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['08h', '10h', '12h', '14h', '16h', '18h', '20h'],
+                labels: rotulosGrafico,
                 datasets: [{
                     label: 'Triagens',
                     data: dadosGrafico,
@@ -112,8 +110,8 @@
                     pointBackgroundColor: '#008080'
                 }]
             },
-            options: { 
-                responsive: true, 
+            options: {
+                responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false }

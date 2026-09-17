@@ -5,14 +5,42 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use App\Models\Pacientes;
+use App\Models\Totens;
 
 class AdminController extends Controller
 {
     // Exibe a tela inicial do Admin (se logado)
     public function home()
     {
-        return view('admin.home'); // certifique-se de enviar as variáveis do dashboard por aqui futuramente
+        $inicioHoje = now()->startOfDay();
+        $fimHoje = now()->endOfDay();
+
+        $triagensHoje = Pacientes::whereBetween('created_at', [$inicioHoje, $fimHoje])->get(['created_at']);
+        $dadosGrafico = array_fill(0, 24, 0);
+
+        foreach ($triagensHoje as $triagem) {
+            $hora = Carbon::parse($triagem->created_at)->hour;
+            $dadosGrafico[$hora]++;
+        }
+
+        $totens = Totens::query()->orderBy('nome')->get();
+
+        return view('admin.home', [
+            'total_triagens' => $triagensHoje->count(),
+            'tempo_medio' => null,
+            'terminais_ativos' => $totens->where('status', 'ONLINE')->count(),
+            'total_terminais' => $totens->count(),
+            'alertas_criticos' => Pacientes::whereBetween('created_at', [$inicioHoje, $fimHoje])
+                ->whereIn('urgencia', ['EMERGÊNCIA (VERMELHO)', 'MUITO URGENTE (LARANJA)'])
+                ->count(),
+            'dados_grafico' => $dadosGrafico,
+            'rotulos_grafico' => array_map(fn ($hora) => sprintf('%02dh', $hora), range(0, 23)),
+            'totens' => $totens,
+        ]);
     }
 
     // Exibe a tela de Login
@@ -109,5 +137,13 @@ class AdminController extends Controller
     public function alertas()
     {
         return view('admin.alertas');
+    }
+     public function triagensHoje(): JsonResponse
+    {
+        $total_triagens = \App\Models\Pacientes::whereDate('created_at', now()->toDateString())->count();
+                return response()->json([
+            'quantidade' => $total_triagens
+        ]);
+        
     }
 }
