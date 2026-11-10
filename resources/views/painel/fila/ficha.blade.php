@@ -26,17 +26,11 @@
     <div>
         <a href="{{ route('painel.fila.index') }}" class="btn claro">Voltar à fila</a>
 
-        @if ($triagem->status === 'aguardando')
-            <form method="POST" action="{{ route('painel.fila.chamar', $triagem) }}" style="display:inline">
-                @csrf
-                <button type="submit" class="btn destaque">Chamar paciente</button>
-            </form>
-        @elseif ($triagem->status === 'em_atendimento' && $triagem->atendido_por === auth()->id())
-            <form method="POST" action="{{ route('painel.fila.finalizar', $triagem) }}" style="display:inline"
-                  onsubmit="return confirm('Finalizar este atendimento?')">
-                @csrf
-                <button type="submit" class="btn">Finalizar atendimento</button>
-            </form>
+               @if (str_contains(url()->previous(), '/painel/historico'))
+            <a href="{{ route('painel.historico.index') }}" class="btn claro"
+               onclick="if (history.length > 1) { history.back(); return false; }">Voltar ao histórico</a>
+        @else
+            <a href="{{ route('painel.fila.index') }}" class="btn claro">Voltar à fila</a>
         @endif
     </div>
 </div>
@@ -56,7 +50,7 @@
         <div class="cartao">
             <h3>Resumo para o médico</h3>
             @if ($r)
-                <div class="ia-caixa">{{ $r['resumo'] }}</div>
+              <div class="ia-caixa">{{ $triagem->resumo_texto }}</div>
                 <p class="origem">
                     @if (($r['origem'] ?? '') === 'gemini')
                         Gerado por IA ({{ $r['modelo'] }}).
@@ -87,6 +81,53 @@
         <div class="cartao">
             <h3>Por que esta cor?</h3>
             <ul>@foreach ($triagem->motivos ?? [] as $motivo)<li>{{ $motivo }}</li>@endforeach</ul>
+        </div>
+
+                <div class="cartao" id="comentarios">
+            <h3>Anotações do atendimento</h3>
+
+            @php
+                $meuAtendimento = $triagem->status === 'em_atendimento' && (int) $triagem->atendido_por === auth()->id();
+            @endphp
+
+            @if ($meuAtendimento)
+                <form method="POST" action="{{ route('painel.fila.comentar', $triagem) }}">
+                    @csrf
+                    <textarea name="texto" id="texto-comentario" class="area-texto" rows="4" maxlength="2000"
+                              placeholder="Registre aqui suas observações sobre o atendimento..."
+                              @if ($errors->has('texto')) autofocus @endif>{{ old('texto') }}</textarea>
+                    @error('texto')<div class="erro-campo">{{ $message }}</div>@enderror
+
+                    <div class="rodape-form">
+                        <span class="aviso" id="contador-comentario">0 / 2000</span>
+                        <button type="submit" class="btn destaque">Adicionar comentário</button>
+                    </div>
+                </form>
+
+                <script>
+                    const campoComentario = document.getElementById('texto-comentario');
+                    const contadorComentario = document.getElementById('contador-comentario');
+                    const contar = () => contadorComentario.textContent = campoComentario.value.length + ' / 2000';
+                    campoComentario.addEventListener('input', contar);
+                    contar();
+                </script>
+            @elseif ($triagem->status === 'aguardando')
+                <p class="aviso">Chame o paciente para registrar comentários durante o atendimento.</p>
+            @endif
+
+            @forelse ($triagem->comentarios->sortByDesc('created_at') as $c)
+                <div class="comentario">
+                    <div class="comentario-topo">
+                        <strong>{{ $c->autor_nome }}</strong>
+                        <span>{{ $c->created_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                    <p>{!! nl2br(e($c->texto)) !!}</p>
+                </div>
+            @empty
+                <p class="sem-dados">Nenhum comentário registrado.</p>
+            @endforelse
+
+            <p class="aviso">Os comentários não podem ser editados nem excluídos, para manter o histórico do atendimento.</p>
         </div>
 
         <div class="cartao">

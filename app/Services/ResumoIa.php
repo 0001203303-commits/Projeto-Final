@@ -101,7 +101,7 @@ TXT;
         $triagem->update(['resumo_ia' => [
             'origem'          => 'gemini',
             'modelo'          => $modelo,
-            'resumo'          => Str::limit(trim(strip_tags((string) $dados['resumo'])), 900),
+            'resumo'          => Str::limit(trim(strip_tags(str_replace(['**', '__', '`'], '', (string) $dados['resumo']))), 900),
             'hipoteses'       => $this->textos($dados['hipoteses'] ?? [], 4, 200),
             'inconsistencias' => array_values(array_unique($inconsistencias)),
             'pontos_atencao'  => $this->textos($dados['pontos_atencao'] ?? [], 6, 250),
@@ -294,7 +294,7 @@ TXT;
     {
         return collect(is_array($valor) ? $valor : [])
             ->filter('is_string')
-            ->map(fn ($s) => Str::limit(trim(strip_tags($s)), $tamanho))
+            ->map(fn ($s) => Str::limit(trim(strip_tags(str_replace(['**', '__', '`'], '', $s))), $tamanho))
             ->filter()
             ->take($max)
             ->values()

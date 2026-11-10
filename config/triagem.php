@@ -17,6 +17,9 @@ return [
     // Valores que disparam aviso imediato à enfermagem
     'alerta_imediato' => ['spo2' => 85, 'pas' => 80],
 
+    // Sem contato por mais que isso (em segundos), o totem aparece como offline
+     'totem_online_segundos' => 120,
+
     'cores' => [
         'laranja' => ['nome' => 'Laranja', 'descricao' => 'Muito urgente', 'tempo' => 'até 10 minutos','limite_min' => 10],
         'amarelo' => ['nome' => 'Amarelo', 'descricao' => 'Urgente',       'tempo' => 'até 60 minutos','limite_min' => 60],

@@ -1,71 +1,86 @@
-@php $cores = config('triagem.cores'); @endphp
+@php
+    $cores = config('triagem.cores');
+    $meuId = auth()->id();
+    $rotulosStatus = ['aguardando' => 'Aguardando', 'em_atendimento' => 'Em atendimento', 'finalizada' => 'Atendido'];
+@endphp
 
-<div class="resumo-fila">
-    @foreach (['laranja', 'amarelo', 'verde', 'azul'] as $c)
-        <div class="contador cor-{{ $c }}">
-            <b>{{ $aguardando->where('cor', $c)->count() }}</b>
-            <span>{{ $cores[$c]['nome'] }}</span>
-        </div>
-    @endforeach
-</div>
-
-<h3 class="titulo-secao">Aguardando ({{ $aguardando->count() }})</h3>
-
-@if ($aguardando->isEmpty())
-    <p class="vazio">Nenhum paciente aguardando.</p>
+@if ($todas->isEmpty())
+    <p class="vazio">Nenhum paciente na fila no momento.</p>
 @else
-    <div class="tabela-wrap">
-        <table class="tabela">
-            <thead>
-                <tr><th>Prioridade</th><th>Ficha</th><th>Paciente</th><th>Queixa</th><th>Espera</th><th></th></tr>
-            </thead>
-            <tbody>
-            @foreach ($aguardando as $t)
-                @php
-                    $limite = $cores[$t->cor]['limite_min'] ?? null;
-                    $atrasado = $limite && $t->espera_minutos > $limite;
-                @endphp
-                <tr class="{{ $t->alerta_imediato ? 'linha-alerta' : '' }}">
-                    <td>
-                        <span class="cor cor-{{ $t->cor }}">{{ $cores[$t->cor]['nome'] }}</span>
-                        @if ($t->alerta_imediato)<span title="Alerta imediato">⚠️</span>@endif
-                    </td>
-                    <td>#{{ str_pad($t->id, 4, '0', STR_PAD_LEFT) }}</td>
-                    <td>{{ $t->paciente->nome }}<small>{{ $t->paciente->idade }} anos</small></td>
-                    <td>{{ $t->sintomas->pluck('nome')->implode(', ') }}</td>
-                    <td class="{{ $atrasado ? 'atrasado' : '' }}">
-                        {{ $t->espera_minutos }} min
-                        @if ($atrasado)<small>acima do limite</small>@endif
-                    </td>
-                    <td><a class="btn" href="{{ route('painel.fila.mostrar', $t) }}">Abrir</a></td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
-@endif
+    <div class="lista-cards">
+        @foreach ($todas as $t)
+            @php
+                $info = $cores[$t->cor];
+                $limite = $info['limite_min'];
+                $queixas = $t->sintomas->pluck('nome')->implode(', ');
+                $resumo = $t->resumo_texto;
+            @endphp
 
-<h3 class="titulo-secao">Em atendimento ({{ $emAtendimento->count() }})</h3>
+            <article class="card-paciente {{ $t->alerta_imediato && $t->status === 'aguardando' ? 'com-alerta' : '' }}"
+                     data-status="{{ $t->status }}"
+                     data-cor="{{ $t->cor }}"
+                     data-atendente="{{ $t->atendido_por }}"
+                     data-busca="{{ \Illuminate\Support\Str::lower(\Illuminate\Support\Str::ascii($t->paciente->nome . ' ' . $queixas . ' ' . str_pad($t->id, 4, '0', STR_PAD_LEFT))) }}">
 
-@if ($emAtendimento->isEmpty())
-    <p class="vazio">Nenhum atendimento em andamento.</p>
-@else
-    <div class="tabela-wrap">
-        <table class="tabela">
-            <thead>
-                <tr><th>Prioridade</th><th>Ficha</th><th>Paciente</th><th>Atendido por</th><th></th></tr>
-            </thead>
-            <tbody>
-            @foreach ($emAtendimento as $t)
-                <tr>
-                    <td><span class="cor cor-{{ $t->cor }}">{{ $cores[$t->cor]['nome'] }}</span></td>
-                    <td>#{{ str_pad($t->id, 4, '0', STR_PAD_LEFT) }}</td>
-                    <td>{{ $t->paciente->nome }}<small>{{ $t->paciente->idade }} anos</small></td>
-                    <td>{{ $t->atendente->name ?? '-' }}</td>
-                    <td><a class="btn claro" href="{{ route('painel.fila.mostrar', $t) }}">Abrir</a></td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
+                <div class="card-topo">
+                    <div class="card-id">
+                        <span class="selo-cor tom-{{ $t->cor }}"><i></i>{{ $info['descricao'] }}</span>
+                        <div>
+                            <div class="card-nome">
+                                {{ $t->paciente->nome }}
+                                @if ($t->alerta_imediato && $t->status !== 'finalizada')<span title="Alerta imediato">⚠️</span>@endif
+                            </div>
+                            <div class="card-sub">{{ $t->paciente->idade }} anos · {{ $t->paciente->sexo }}</div>
+                        </div>
+                    </div>
+
+                    <div class="card-acoes">
+                        <span class="status-tag status-{{ $t->status }}">
+                            {{ $rotulosStatus[$t->status] }}
+                            @if ($t->status === 'em_atendimento')
+                                · {{ (int) $t->atendido_por === $meuId ? 'você' : ($t->atendente->name ?? '') }}
+                            @endif
+                        </span>
+
+                        <a class="btn-ver" href="{{ route('painel.fila.mostrar', $t) }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            Ver detalhes
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-resumo">{{ $resumo !== '' ? $resumo : 'Resumo ainda não disponível.' }}</div>
+
+                <div class="card-rodape">
+                    <span>Ficha #{{ str_pad($t->id, 4, '0', STR_PAD_LEFT) }}</span>
+                    @if ($queixas)<span>{{ $queixas }}</span>@endif
+
+                    @if ($t->status === 'aguardando')
+                        @if ($limite)
+                            @php
+                                $pct = min(100, (int) round($t->espera_minutos / $limite * 100));
+                                $nivel = $pct >= 100 ? 'estourou' : ($pct >= 70 ? 'perto' : 'ok');
+                            @endphp
+                            <span class="espera">
+                                <span class="barra-espera {{ $nivel }}"><div style="width: {{ $pct }}%"></div></span>
+                                <span class="{{ $pct >= 100 ? 'atrasado' : '' }}">{{ $t->espera_minutos }} / {{ $limite }} min</span>
+                            </span>
+                        @else
+                            <span>Espera: {{ $t->espera_minutos }} min</span>
+                        @endif
+                    @elseif ($t->status === 'em_atendimento' && $t->chamado_em)
+                        <span>Em atendimento há {{ (int) floor(abs($t->chamado_em->diffInMinutes(now()))) }} min</span>
+                    @elseif ($t->status === 'finalizada' && $t->finalizado_em)
+                        <span>Finalizado às {{ $t->finalizado_em->format('H:i') }}</span>
+                    @endif
+
+                    @if ($t->comentarios_count > 0)
+                        <span>💬 {{ $t->comentarios_count }} {{ $t->comentarios_count === 1 ? 'comentário' : 'comentários' }}</span>
+                    @endif
+                </div>
+            </article>
+        @endforeach
     </div>
+
+    <p class="vazio" id="sem-resultado" hidden>Nenhum paciente com os filtros atuais.</p>
 @endif

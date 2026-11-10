@@ -10,7 +10,7 @@ class PainelController extends Controller
     public function inicio(Request $request)
     {
         return match ($request->user()->perfil) {
-            'medico' => redirect()->route('painel.fila.index'),
+            'medico' => redirect()->route('painel.principal'),
             'ti' => redirect()->route('painel.ti'),
             'admin' => redirect()->route('painel.admin'),
             default => abort(403),

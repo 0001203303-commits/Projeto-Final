@@ -1,14 +1,18 @@
 <?php
 
-use App\Http\Controllers\QuestionarioController;
-use App\Http\Controllers\TriagemController;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Painel\UsuarioController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Painel\AdminController;
 use App\Http\Controllers\Painel\FilaController;
 use App\Http\Controllers\Painel\PainelController;
+use App\Http\Controllers\Painel\PrincipalController;
 use App\Http\Controllers\Painel\TiController;
+use App\Http\Controllers\QuestionarioController;
+use App\Http\Controllers\TriagemController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Painel\HistoricoController;
+use App\Http\Controllers\Painel\TotemController;
+
 
 Route::get('/', [TriagemController::class, 'inicio'])->name('triagem.inicio');
 
@@ -26,8 +30,6 @@ Route::prefix('triagem')->name('triagem.')->group(function () {
 
     Route::post('/encerrar', [QuestionarioController::class, 'encerrar'])->name('encerrar');
 
-    
-
 });
 
 // ----- Autenticação -----
@@ -42,14 +44,63 @@ Route::post('/logout', [LoginController::class, 'sair'])->middleware('auth')->na
 Route::middleware('auth')->prefix('painel')->name('painel.')->group(function () {
     Route::get('/', [PainelController::class, 'inicio'])->name('inicio');
 
+    // ----- TI -----
+     Route::middleware('perfil:ti')->group(function () {
+        Route::get('/ti', [TiController::class, 'inicio'])->name('ti');
+        Route::get('/ti/parcial', [TiController::class, 'parcial'])->name('ti.parcial');
+    });
+
+    // ----- Médico -----
+        Route::middleware('perfil:medico')->group(function () {
+        Route::get('/principal', [PrincipalController::class, 'index'])->name('principal');
+        Route::get('/principal/parcial', [PrincipalController::class, 'parcial'])->name('principal.parcial');
+
+        
+    });
+
+     Route::middleware('perfil:ti')->prefix('totens')->name('totens.')->group(function () {
+        Route::get('/', [TotemController::class, 'index'])->name('index');
+        Route::get('/parcial', [TotemController::class, 'parcial'])->name('parcial');
+        Route::get('/novo', [TotemController::class, 'create'])->name('create');
+        Route::post('/', [TotemController::class, 'store'])->name('store');
+        Route::get('/{totem}/editar', [TotemController::class, 'edit'])->name('edit');
+        Route::put('/{totem}', [TotemController::class, 'update'])->name('update');
+        Route::post('/{totem}/token', [TotemController::class, 'novoToken'])->name('token');
+        Route::post('/{totem}/alternar', [TotemController::class, 'alternar'])->name('alternar');
+        Route::delete('/{totem}', [TotemController::class, 'destroy'])->name('destroy');
+    });
+
+    
+
     Route::middleware('perfil:medico')->prefix('fila')->name('fila.')->group(function () {
+
+        Route::post('/{triagem}/comentarios', [FilaController::class, 'comentar'])->name('comentar');
         Route::get('/', [FilaController::class, 'index'])->name('index');
         Route::get('/parcial', [FilaController::class, 'parcial'])->name('parcial');
         Route::get('/{triagem}', [FilaController::class, 'mostrar'])->name('mostrar');
         Route::post('/{triagem}/chamar', [FilaController::class, 'chamar'])->name('chamar');
         Route::post('/{triagem}/finalizar', [FilaController::class, 'finalizar'])->name('finalizar');
+
+        
+    });
+    
+
+        Route::middleware('perfil:admin')->prefix('usuarios')->name('usuarios.')->group(function () {
+        Route::get('/', [UsuarioController::class, 'index'])->name('index');
+        Route::get('/novo', [UsuarioController::class, 'create'])->name('create');
+        Route::post('/', [UsuarioController::class, 'store'])->name('store');
+        Route::get('/{usuario}/editar', [UsuarioController::class, 'edit'])->name('edit');
+        Route::put('/{usuario}', [UsuarioController::class, 'update'])->name('update');
+        Route::post('/{usuario}/senha', [UsuarioController::class, 'redefinirSenha'])->name('senha');
+        Route::post('/{usuario}/alternar', [UsuarioController::class, 'alternar'])->name('alternar');
+        Route::delete('/{usuario}', [UsuarioController::class, 'destroy'])->name('destroy');
     });
 
     Route::get('/admin', [AdminController::class, 'inicio'])->middleware('perfil:admin')->name('admin');
-    Route::get('/ti', [TiController::class, 'inicio'])->middleware('perfil:ti')->name('ti');
+
+// ----- Histórico -----
+    Route::middleware('perfil:medico')->prefix('historico')->name('historico.')->group(function () {
+    Route::get('/', [HistoricoController::class, 'index'])->name('index');
+    Route::get('/exportar', [HistoricoController::class, 'exportar'])->name('exportar');
+    });   
 });

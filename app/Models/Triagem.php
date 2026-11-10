@@ -57,4 +57,32 @@ class Triagem extends Model
     {
         return (int) floor(abs($this->created_at->diffInMinutes(now())));
     }
+        public function comentarios(): HasMany
+    {
+        return $this->hasMany(TriagemComentario::class);
+    }
+
+    /** Resumo da IA sem símbolos de formatação (**negrito**, # títulos etc.). */
+    public function getResumoTextoAttribute(): string
+    {
+        $texto = $this->resumo_ia['resumo'] ?? '';
+
+        return trim(preg_replace('/\*{1,3}|_{2,}|`|^#+\s*/m', '', $texto));
+    }
+
+        /** Minutos entre a chegada e o chamado (null se ainda não foi chamado). */
+    public function getEsperaAteChamadoAttribute(): ?int
+    {
+        return $this->chamado_em
+            ? (int) floor(abs($this->created_at->diffInMinutes($this->chamado_em)))
+            : null;
+    }
+
+    /** Minutos entre o chamado e a finalização (null se não finalizou). */
+    public function getDuracaoAtendimentoAttribute(): ?int
+    {
+        return ($this->chamado_em && $this->finalizado_em)
+            ? (int) floor(abs($this->chamado_em->diffInMinutes($this->finalizado_em)))
+            : null;
+    }
 }
