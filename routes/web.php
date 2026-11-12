@@ -12,6 +12,7 @@ use App\Http\Controllers\TriagemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Painel\HistoricoController;
 use App\Http\Controllers\Painel\TotemController;
+use App\Http\Controllers\Painel\BancoApiController;
 
 
 Route::get('/', [TriagemController::class, 'inicio'])->name('triagem.inicio');
@@ -50,12 +51,27 @@ Route::middleware('auth')->prefix('painel')->name('painel.')->group(function () 
         Route::get('/ti/parcial', [TiController::class, 'parcial'])->name('ti.parcial');
     });
 
-    // ----- Médico -----
-        Route::middleware('perfil:medico')->group(function () {
-        Route::get('/principal', [PrincipalController::class, 'index'])->name('principal');
-        Route::get('/principal/parcial', [PrincipalController::class, 'parcial'])->name('principal.parcial');
+        Route::middleware('perfil:ti')->prefix('banco-api')->name('bancoapi.')->group(function () {
+        Route::get('/', [BancoApiController::class, 'index'])->name('index');
 
-        
+        Route::post('/migrations', [BancoApiController::class, 'aplicarMigrations'])->name('migrations');
+
+        Route::post('/backups', [BancoApiController::class, 'criarBackup'])->name('backup.criar');
+        Route::get('/backups/{arquivo}', [BancoApiController::class, 'baixarBackup'])
+            ->where('arquivo', 'smart_triage_\d{8}_\d{6}\.sql')->name('backup.baixar');
+        Route::delete('/backups/{arquivo}', [BancoApiController::class, 'excluirBackup'])
+            ->where('arquivo', 'smart_triage_\d{8}_\d{6}\.sql')->name('backup.excluir');
+
+        Route::put('/gemini', [BancoApiController::class, 'salvarGemini'])->name('gemini.salvar');
+        Route::post('/gemini/testar', [BancoApiController::class, 'testarGemini'])->name('gemini.testar');
+        Route::get('/gemini/modelos', [BancoApiController::class, 'modelosGemini'])->name('gemini.modelos');
+
+        Route::put('/totens-api', [BancoApiController::class, 'salvarTimeoutTotem'])->name('totens.salvar');
+    });
+
+    // ----- Médico -----
+    Route::middleware('perfil:medico')->group(function () {
+        Route::get('/principal', [AdminController::class, 'inicio'])->name('principal');
     });
 
      Route::middleware('perfil:ti')->prefix('totens')->name('totens.')->group(function () {
@@ -83,9 +99,7 @@ Route::middleware('auth')->prefix('painel')->name('painel.')->group(function () 
 
         
     });
-    
-
-        Route::middleware('perfil:admin')->prefix('usuarios')->name('usuarios.')->group(function () {
+    Route::middleware('perfil:admin')->prefix('usuarios')->name('usuarios.')->group(function () {
         Route::get('/', [UsuarioController::class, 'index'])->name('index');
         Route::get('/novo', [UsuarioController::class, 'create'])->name('create');
         Route::post('/', [UsuarioController::class, 'store'])->name('store');
@@ -96,7 +110,10 @@ Route::middleware('auth')->prefix('painel')->name('painel.')->group(function () 
         Route::delete('/{usuario}', [UsuarioController::class, 'destroy'])->name('destroy');
     });
 
-    Route::get('/admin', [AdminController::class, 'inicio'])->middleware('perfil:admin')->name('admin');
+    Route::middleware('perfil:admin')->group(function () {
+        Route::get('/admin', [PrincipalController::class, 'index'])->name('admin');
+        Route::get('/admin/parcial', [PrincipalController::class, 'parcial'])->name('admin.parcial');
+    });
 
 // ----- Histórico -----
     Route::middleware('perfil:medico')->prefix('historico')->name('historico.')->group(function () {

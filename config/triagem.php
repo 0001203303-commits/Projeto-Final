@@ -14,6 +14,9 @@ return [
 
     'idade_pediatrica' => 14,
 
+        // Caminho do mysqldump (usado nos backups pelo painel do TI)
+    'mysqldump' => env('MYSQLDUMP_PATH', 'mysqldump'),
+
     // Valores que disparam aviso imediato à enfermagem
     'alerta_imediato' => ['spo2' => 85, 'pas' => 80],
 

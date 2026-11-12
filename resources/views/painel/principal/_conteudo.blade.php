@@ -11,12 +11,16 @@
 @if ($e['alertas'] > 0)
     <div class="banner-alerta critico">
         <span>{{ $e['alertas'] }} {{ $e['alertas'] === 1 ? 'paciente com alerta imediato aguardando' : 'pacientes com alerta imediato aguardando' }}.</span>
-        <a href="{{ route('painel.fila.index') }}">Ir para a fila →</a>
+        @if (auth()->user()->perfil === 'medico')
+            <a href="{{ route('painel.fila.index') }}">Ir para a fila →</a>
+        @endif
     </div>
 @elseif ($e['acima_limite'] > 0)
     <div class="banner-alerta aviso-amarelo">
         <span>{{ $e['acima_limite'] }} {{ $e['acima_limite'] === 1 ? 'paciente está' : 'pacientes estão' }} acima do tempo de espera recomendado.</span>
-        <a href="{{ route('painel.fila.index') }}">Ir para a fila →</a>
+        @if (auth()->user()->perfil === 'medico')
+            <a href="{{ route('painel.fila.index') }}">Ir para a fila →</a>
+        @endif
     </div>
 @endif
 
@@ -226,7 +230,9 @@
                         @endif
                     </small>
                 </div>
-                <a class="btn claro" href="{{ route('painel.fila.mostrar', $t) }}">Abrir</a>
+                @if (auth()->user()->perfil === 'medico')
+                    <a class="btn claro" href="{{ route('painel.fila.mostrar', $t) }}">Abrir</a>
+                @endif
             </div>
         @empty
             <p class="sem-dados">Nenhum paciente exigindo atenção especial. 👍</p>

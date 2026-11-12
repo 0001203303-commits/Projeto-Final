@@ -8,6 +8,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Models\IaEvento;
 
 class ResumoIa
 {
@@ -29,33 +30,27 @@ TXT;
     // ------------------------------------------------------------------
     // Resumo local: sempre disponível, não depende de internet
     // ------------------------------------------------------------------
-    public function gerarLocal(Triagem $triagem): void
+        public function gerarComGemini(Triagem $triagem): bool
     {
-        $this->carregar($triagem);
+        $config = app(ConfiguracaoGemini::class);
+        $chave = $config->chave();
 
-        $triagem->update(['resumo_ia' => $this->resumoLocal($triagem)]);
-    }
-
-    // ------------------------------------------------------------------
-    // Resumo com Gemini: substitui o local se tudo der certo
-    // ------------------------------------------------------------------
-    public function gerarComGemini(Triagem $triagem): bool
-    {
-        $chave = config('services.gemini.key');
-
-        if (! $chave) {
+        if (! $config->ativo() || ! $chave) {
             return false;
         }
 
         $this->carregar($triagem);
         set_time_limit(60);
 
-        $modelo = config('services.gemini.model');
+        $modelo = $config->modelo();
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$modelo}:generateContent";
+
+        $inicio = microtime(true);
+        $ms = fn () => (int) round((microtime(true) - $inicio) * 1000);
 
         try {
             $resposta = Http::withHeaders(['x-goog-api-key' => $chave])
-                ->timeout((int) config('services.gemini.timeout', 15))
+                ->timeout($config->timeout())
                 ->retry(
                     1,
                     500,
@@ -65,17 +60,16 @@ TXT;
                 )
                 ->post($url, $this->payload($triagem));
         } catch (\Throwable $e) {
+            $this->registrar($triagem, false, null, $ms(), $e->getMessage(), $modelo);
             Log::warning('Gemini indisponível', ['triagem' => $triagem->id, 'erro' => $e->getMessage()]);
 
             return false;
         }
 
         if ($resposta->failed()) {
-            Log::warning('Gemini retornou erro', [
-                'triagem' => $triagem->id,
-                'status'  => $resposta->status(),
-                'erro'    => Str::limit($resposta->body(), 300),
-            ]);
+            $mensagem = $resposta->json('error.message') ?? Str::limit($resposta->body(), 200);
+            $this->registrar($triagem, false, $resposta->status(), $ms(), $mensagem, $modelo);
+            Log::warning('Gemini retornou erro', ['triagem' => $triagem->id, 'status' => $resposta->status(), 'erro' => Str::limit($mensagem, 300)]);
 
             return false;
         }
@@ -88,6 +82,7 @@ TXT;
         $dados = json_decode($texto, true);
 
         if (! is_array($dados) || empty($dados['resumo'])) {
+            $this->registrar($triagem, false, $resposta->status(), $ms(), 'Formato de resposta inesperado.', $modelo);
             Log::warning('Gemini retornou formato inesperado', ['triagem' => $triagem->id]);
 
             return false;
@@ -108,7 +103,25 @@ TXT;
             'gerado_em'       => now()->toIso8601String(),
         ]]);
 
+        $this->registrar($triagem, true, $resposta->status(), $ms(), null, $modelo);
+
         return true;
+    }
+
+    private function registrar(Triagem $triagem, bool $sucesso, ?int $status, int $ms, ?string $mensagem, string $modelo): void
+    {
+        try {
+            IaEvento::create([
+                'triagem_id'  => $triagem->id,
+                'sucesso'     => $sucesso,
+                'status_http' => $status,
+                'duracao_ms'  => $ms,
+                'modelo'      => $modelo,
+                'mensagem'    => $mensagem ? Str::limit($mensagem, 290) : null,
+            ]);
+        } catch (\Throwable) {
+            // Falha ao registrar a métrica nunca deve atrapalhar o resumo
+        }
     }
 
     // ------------------------------------------------------------------

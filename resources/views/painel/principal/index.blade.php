@@ -18,7 +18,7 @@
 
     <div class="abas">
         @foreach ($periodos as $chave => $rotulo)
-            <a href="{{ route('painel.principal', ['periodo' => $chave]) }}" class="{{ $periodo === $chave ? 'ativa' : '' }}">{{ $rotulo }}</a>
+            <a href="{{ route('painel.admin', ['periodo' => $chave]) }}" class="{{ $periodo === $chave ? 'ativa' : '' }}">{{ $rotulo }}</a>
         @endforeach
     </div>
 </div>
@@ -32,7 +32,7 @@
 </div>
 
 <script>
-    const URL_ATUALIZAR = @json(route('painel.principal.parcial', ['periodo' => $periodo]));
+    const URL_ATUALIZAR = @json(route('painel.admin.parcial', ['periodo' => $periodo]));
     let ultima = Date.now();
     let falhas = 0;
 

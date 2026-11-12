@@ -68,10 +68,10 @@
                     <svg {!! $svg !!}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                     Totens
                 </a>
-                <span class="nav-desativado" title="Em breve">
+                    <a href="{{ route('painel.bancoapi.index') }}" class="{{ request()->routeIs('painel.bancoapi.*') ? 'ativo' : '' }}">
                     <svg {!! $svg !!}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-                    Banco de Dados e API <em>em breve</em>
-                </span>
+                    Banco de Dados e API
+                </a>
                 <span class="nav-desativado" title="Em breve">
                     <svg {!! $svg !!}><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
                     Configurações <em>em breve</em>
