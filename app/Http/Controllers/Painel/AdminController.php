@@ -3,21 +3,36 @@
 namespace App\Http\Controllers\Painel;
 
 use App\Http\Controllers\Controller;
-use App\Models\Triagem;
-use App\Models\User;
+use App\Services\EstatisticasAdmin;
+use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    public function inicio()
+    public function inicio(Request $request)
     {
-        $hoje = fn () => Triagem::whereNotNull('cor')->whereDate('created_at', today());
+        return view('painel.admin.index', $this->dados($request));
+    }
 
-        return view('painel.admin', [
-            'totalHoje'     => $hoje()->count(),
-            'porCor'        => $hoje()->selectRaw('cor, COUNT(*) as total')->groupBy('cor')->pluck('total', 'cor'),
-            'aguardando'    => Triagem::whereNotNull('cor')->where('status', 'aguardando')->count(),
-            'emAtendimento' => Triagem::where('status', 'em_atendimento')->count(),
-            'usuarios'      => User::where('ativo', true)->count(),
-        ]);
+    /** Só o conteúdo, para a atualização automática. */
+    public function parcial(Request $request)
+    {
+        return view('painel.admin._conteudo', $this->dados($request));
+    }
+
+    private function dados(Request $request): array
+    {
+        $periodo = in_array($request->query('periodo'), ['hoje', '7d', '30d'], true)
+            ? $request->query('periodo')
+            : 'hoje';
+
+        $inicio = match ($periodo) {
+            'hoje' => today(),
+            '7d'   => today()->subDays(6),
+            '30d'  => today()->subDays(29),
+        };
+
+        $e = app(EstatisticasAdmin::class)->calcular($periodo, $inicio);
+
+        return compact('periodo', 'e');
     }
 }

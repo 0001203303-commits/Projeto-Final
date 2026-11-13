@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Pergunta extends Model
 {
@@ -16,5 +18,11 @@ class Pergunta extends Model
     public function sintoma(): BelongsTo
     {
         return $this->belongsTo(Sintoma::class);
+    }
+
+
+    public function respostas(): HasMany
+    {
+        return $this->hasMany(TriagemResposta::class);
     }
 }

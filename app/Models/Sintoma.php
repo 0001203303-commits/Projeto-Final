@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;   
 
 class Sintoma extends Model
 {
@@ -14,6 +15,12 @@ class Sintoma extends Model
 
     protected $casts = ['ativo' => 'boolean'];
 
+    
+
+    public function triagens(): BelongsToMany
+    {
+        return $this->belongsToMany(Triagem::class, 'triagem_sintomas');
+    }
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(CategoriaSintoma::class, 'categoria_id');
