@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\GerarResumoIa;
-use App\Services\ResumoIa;
 use App\Models\CategoriaSintoma;
 use App\Models\Pergunta;
 use App\Models\Triagem;
 use App\Models\TriagemResposta;
 use App\Services\ClassificadorTriagem;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class QuestionarioController extends Controller
 {
+    public function __construct(private ClassificadorTriagem $classificador) {}
+
     public function sintomas(Request $request)
     {
         $triagem = $this->triagemAtual($request);
@@ -118,7 +120,7 @@ class QuestionarioController extends Controller
         return $this->finalizar($triagem);
     }
 
-    public function resultado(Request $request)
+    public function resultado(Request $request): View|RedirectResponse
     {
         $triagem = $this->triagemAtual($request);
 
@@ -135,26 +137,23 @@ class QuestionarioController extends Controller
         return view('totem.resultado', compact('triagem', 'info'));
     }
 
-    public function encerrar(Request $request)
+       public function encerrar(Request $request)
     {
-        $request->session()->forget('triagem_id');
+        // Totem compartilhado: limpa tudo para o próximo paciente começar do zero
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect()->route('triagem.inicio');
     }
 
-    private function finalizar(Triagem $triagem)
-            {
-                $triagem->update(app(ClassificadorTriagem::class)->classificar($triagem));
+    private function finalizar(Triagem $triagem): RedirectResponse
+    {
+        $triagem->update($this->classificador->classificar($triagem));
 
-                // 1) resumo local imediato (funciona offline)
-                app(ResumoIa::class)->gerarLocal($triagem);
+        return redirect()->route('triagem.resultado');
+    }
 
-                // 2) Gemini em segundo plano, depois que o paciente já recebeu a tela
-                GerarResumoIa::dispatchAfterResponse($triagem->id);
-
-                return redirect()->route('triagem.resultado');
-            }
-
+    /** Perguntas ativas dos sintomas marcados, na ordem em que aparecem. */
     private function perguntasDaTriagem(Triagem $triagem)
     {
         return $triagem->sintomas()

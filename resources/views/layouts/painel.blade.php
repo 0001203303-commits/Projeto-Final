@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="{{ auth()->user()->tema ?? 'auto' }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        // Define o tema antes da página aparecer, para não piscar. "auto" segue o sistema.
+        (function () {
+            var el = document.documentElement;
+            if (el.dataset.tema === 'auto') {
+                el.dataset.tema = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro';
+            }
+        })();
+    </script>
     <title>@yield('titulo', 'Painel') · Smart-Triage</title>
     <link rel="stylesheet" href="{{ asset('css/painel.css') }}">
 </head>
@@ -20,7 +29,7 @@
 
             <nav>
                 @if ($u->perfil === 'medico')
-                    <a href="{{ route('painel.admin') }}" class="{{ request()->routeIs('painel.admin*') ? 'ativo' : '' }}">
+                    <a href="{{ route('painel.principal') }}" class="{{ request()->routeIs('painel.admin*') ? 'ativo' : '' }}">
                         <svg {!! $svg !!}>
                             <rect x="3" y="3" width="7" height="7" />
                             <rect x="14" y="3" width="7" height="7" />
@@ -49,19 +58,6 @@
                         </svg>
                         Históricos
                     </a>
-                    <span class="nav-desativado" title="Em breve">
-                        <svg {!! $svg !!}>
-                            <line x1="4" y1="21" x2="4" y2="14" />
-                            <line x1="4" y1="10" x2="4" y2="3" />
-                            <line x1="12" y1="21" x2="12" y2="12" />
-                            <line x1="12" y1="8" x2="12" y2="3" />
-                            <line x1="20" y1="21" x2="20" y2="16" />
-                            <line x1="20" y1="12" x2="20" y2="3" />
-                            <line x1="1" y1="14" x2="7" y2="14" />
-                            <line x1="9" y1="8" x2="15" y2="8" />
-                            <line x1="17" y1="16" x2="23" y2="16" />
-                        </svg>
-                        Configurações <em>em breve</em>
                     </span>
                 @endif
 
@@ -94,76 +90,63 @@
                         </svg>
                         Sintomas e Perguntas
                     </a>
-                    <span class="nav-desativado" title="Em breve">
-                        <a href="{{ route('painel.relatorios.index') }}"
-                            class="{{ request()->routeIs('painel.relatorios.*') ? 'ativo' : '' }}">
-                            <svg {!! $svg !!}>
-                                <line x1="18" y1="20" x2="18" y2="10" />
-                                <line x1="12" y1="20" x2="12" y2="4" />
-                                <line x1="6" y1="20" x2="6" y2="14" />
-                            </svg>
-                            Relatórios
-                        </a>
-                        <span class="nav-desativado" title="Em breve">
-                            <svg {!! $svg !!}>
-                                <line x1="4" y1="21" x2="4" y2="14" />
-                                <line x1="4" y1="10" x2="4" y2="3" />
-                                <line x1="12" y1="21" x2="12" y2="12" />
-                                <line x1="12" y1="8" x2="12" y2="3" />
-                                <line x1="20" y1="21" x2="20" y2="16" />
-                                <line x1="20" y1="12" x2="20" y2="3" />
-                                <line x1="1" y1="14" x2="7" y2="14" />
-                                <line x1="9" y1="8" x2="15" y2="8" />
-                                <line x1="17" y1="16" x2="23" y2="16" />
-                            </svg>
-                            Configurações <em>em breve</em>
-                        </span>
+
+                    <a href="{{ route('painel.relatorios.index') }}"
+                        class="{{ request()->routeIs('painel.relatorios.*') ? 'ativo' : '' }}">
+                        <svg {!! $svg !!}>
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg>
+                        Relatórios
+                    </a>
                 @endif
 
-                    @if ($u->perfil === 'ti')
-                        <a href="{{ route('painel.ti') }}"
-                            class="{{ request()->routeIs('painel.ti', 'painel.ti.parcial') ? 'ativo' : '' }}">
-                            <svg {!! $svg !!}>
-                                <rect x="3" y="3" width="7" height="7" />
-                                <rect x="14" y="3" width="7" height="7" />
-                                <rect x="14" y="14" width="7" height="7" />
-                                <rect x="3" y="14" width="7" height="7" />
-                            </svg>
-                            Painel Principal
-                        </a>
-                        <a href="{{ route('painel.totens.index') }}"
-                            class="{{ request()->routeIs('painel.totens.*') ? 'ativo' : '' }}">
-                            <svg {!! $svg !!}>
-                                <rect x="2" y="3" width="20" height="14" rx="2" />
-                                <line x1="8" y1="21" x2="16" y2="21" />
-                                <line x1="12" y1="17" x2="12" y2="21" />
-                            </svg>
-                            Totens
-                        </a>
-                        <a href="{{ route('painel.bancoapi.index') }}"
-                            class="{{ request()->routeIs('painel.bancoapi.*') ? 'ativo' : '' }}">
-                            <svg {!! $svg !!}>
-                                <ellipse cx="12" cy="5" rx="9" ry="3" />
-                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
-                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
-                            </svg>
-                            Banco de Dados e API
-                        </a>
-                        <span class="nav-desativado" title="Em breve">
-                            <svg {!! $svg !!}>
-                                <line x1="4" y1="21" x2="4" y2="14" />
-                                <line x1="4" y1="10" x2="4" y2="3" />
-                                <line x1="12" y1="21" x2="12" y2="12" />
-                                <line x1="12" y1="8" x2="12" y2="3" />
-                                <line x1="20" y1="21" x2="20" y2="16" />
-                                <line x1="20" y1="12" x2="20" y2="3" />
-                                <line x1="1" y1="14" x2="7" y2="14" />
-                                <line x1="9" y1="8" x2="15" y2="8" />
-                                <line x1="17" y1="16" x2="23" y2="16" />
-                            </svg>
-                            Configurações <em>em breve</em>
-                        </span>
-                    @endif
+                @if ($u->perfil === 'ti')
+                    <a href="{{ route('painel.ti') }}"
+                        class="{{ request()->routeIs('painel.ti', 'painel.ti.parcial') ? 'ativo' : '' }}">
+                        <svg {!! $svg !!}>
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="14" y="14" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                        </svg>
+                        Painel Principal
+                    </a>
+                    <a href="{{ route('painel.totens.index') }}"
+                        class="{{ request()->routeIs('painel.totens.*') ? 'ativo' : '' }}">
+                        <svg {!! $svg !!}>
+                            <rect x="2" y="3" width="20" height="14" rx="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                        Totens
+                    </a>
+                    <a href="{{ route('painel.bancoapi.index') }}"
+                        class="{{ request()->routeIs('painel.bancoapi.*') ? 'ativo' : '' }}">
+                        <svg {!! $svg !!}>
+                            <ellipse cx="12" cy="5" rx="9" ry="3" />
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                        </svg>
+                        Banco de Dados e API
+                    </a>
+                @endif
+                <a href="{{ route('painel.configuracoes.index') }}"
+                    class="{{ request()->routeIs('painel.configuracoes.*') ? 'ativo' : '' }}">
+                    <svg {!! $svg !!}>
+                        <line x1="4" y1="21" x2="4" y2="14" />
+                        <line x1="4" y1="10" x2="4" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12" y2="3" />
+                        <line x1="20" y1="21" x2="20" y2="16" />
+                        <line x1="20" y1="12" x2="20" y2="3" />
+                        <line x1="1" y1="14" x2="7" y2="14" />
+                        <line x1="9" y1="8" x2="15" y2="8" />
+                        <line x1="17" y1="16" x2="23" y2="16" />
+                    </svg>
+                    Configurações
+                </a>
             </nav>
 
             <div class="usuario">

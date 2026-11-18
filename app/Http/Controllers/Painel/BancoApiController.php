@@ -20,11 +20,11 @@ class BancoApiController extends Controller
 
         if ($aba === 'banco') {
             return view('painel.bancoapi.index', [
-                'aba'        => 'banco',
-                'status'     => $banco->status(),
-                'tabelas'    => $banco->tabelas(),
+                'aba' => 'banco',
+                'status' => $banco->status(),
+                'tabelas' => $banco->tabelas(),
                 'migrations' => $banco->migrations(),
-                'backups'    => $banco->backups(),
+                'backups' => $banco->backups(),
             ]);
         }
 
@@ -44,10 +44,10 @@ class BancoApiController extends Controller
         Log::warning('TI aplicou migrations pelo painel', ['usuario' => $request->user()->id, 'ok' => $resultado['ok']]);
 
         if (! $resultado['ok']) {
-            return back()->withErrors(['acao' => 'Falha ao aplicar as migrations: ' . Str::limit($resultado['saida'], 400)]);
+            return back()->withErrors(['acao' => 'Falha ao aplicar as migrations: '.Str::limit($resultado['saida'], 400)]);
         }
 
-        return redirect()->route('painel.bancoapi.index')->with('ok', 'Migrations aplicadas com sucesso.');
+        return redirect()->to('/painel/bancoapi?aba=banco')->with('ok', 'Migrations aplicadas com sucesso.');
     }
 
     public function criarBackup(Request $request, GerenciadorBanco $banco)
@@ -57,10 +57,10 @@ class BancoApiController extends Controller
         Log::warning('TI criou um backup do banco', ['usuario' => $request->user()->id, 'ok' => $resultado['ok']]);
 
         if (! $resultado['ok']) {
-            return back()->withErrors(['acao' => 'Não foi possível criar o backup: ' . Str::limit($resultado['erro'], 400)]);
+            return back()->withErrors(['acao' => 'Não foi possível criar o backup: '.Str::limit($resultado['erro'], 400)]);
         }
 
-        return redirect()->route('painel.bancoapi.index')->with('ok', "Backup criado: {$resultado['arquivo']}");
+        return redirect()->to('/painel/bancoapi?aba=banco')->with('ok', "Backup criado: {$resultado['arquivo']}");
     }
 
     public function baixarBackup(Request $request, GerenciadorBanco $banco, string $arquivo)
@@ -89,14 +89,14 @@ class BancoApiController extends Controller
     public function salvarGemini(Request $request)
     {
         $dados = $request->validate([
-            'modelo'  => ['required', 'string', 'max:80', 'regex:/^[A-Za-z0-9._\-]+$/'],
+            'modelo' => ['required', 'string', 'max:80', 'regex:/^[A-Za-z0-9._\-]+$/'],
             'timeout' => ['required', 'integer', 'between:5,60'],
-            'chave'   => ['nullable', 'string', 'min:20', 'max:300'],
+            'chave' => ['nullable', 'string', 'min:20', 'max:300'],
         ], [
             'modelo.required' => 'Informe o modelo.',
-            'modelo.regex'    => 'O nome do modelo só pode ter letras, números, ponto, hífen e sublinhado.',
-            'timeout.*'       => 'O tempo limite deve estar entre 5 e 60 segundos.',
-            'chave.min'       => 'A chave parece curta demais. Confira se copiou inteira.',
+            'modelo.regex' => 'O nome do modelo só pode ter letras, números, ponto, hífen e sublinhado.',
+            'timeout.*' => 'O tempo limite deve estar entre 5 e 60 segundos.',
+            'chave.min' => 'A chave parece curta demais. Confira se copiou inteira.',
         ]);
 
         Configuracao::definir('gemini.ativo', $request->boolean('ativo') ? '1' : '0');
@@ -155,21 +155,21 @@ class BancoApiController extends Controller
 
         return [
             'gemini' => [
-                'ativo'   => $g->ativo(),
-                'modelo'  => $g->modelo(),
+                'ativo' => $g->ativo(),
+                'modelo' => $g->modelo(),
                 'timeout' => $g->timeout(),
-                'chave'   => $g->chaveMascarada(),
-                'origem'  => $g->origemChave(),
+                'chave' => $g->chaveMascarada(),
+                'origem' => $g->origemChave(),
             ],
             'ia' => [
                 'tentativas' => $tentativas,
-                'sucessos'   => $sucessos,
-                'taxa'       => $tentativas ? (int) round($sucessos / $tentativas * 100) : null,
-                'media_ms'   => $mediaMs,
-                'falhas'     => IaEvento::where('sucesso', false)->latest('created_at')->limit(5)->get(),
+                'sucessos' => $sucessos,
+                'taxa' => $tentativas ? (int) round($sucessos / $tentativas * 100) : null,
+                'media_ms' => $mediaMs,
+                'falhas' => IaEvento::where('sucesso', false)->latest('created_at')->limit(5)->get(),
             ],
-            'totens'       => $totens,
-            'totens24h'    => $totens->filter(fn ($t) => $t->ultimo_sinal && $t->ultimo_sinal->gt(now()->subDay()))->count(),
+            'totens' => $totens,
+            'totens24h' => $totens->filter(fn ($t) => $t->ultimo_sinal && $t->ultimo_sinal->gt(now()->subDay()))->count(),
             'timeoutTotem' => (int) Configuracao::obter('totem.timeout', (string) config('triagem.totem_timeout', 120)),
         ];
     }

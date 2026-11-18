@@ -11,14 +11,13 @@ return new class extends Migration
         Schema::create('totens', function (Blueprint $table) {
             $table->id();
             $table->string('nome', 100)->unique();
-            $table->string('local', 150)->nullable();
-            $table->text('observacoes')->nullable();
-            $table->string('token_hash', 64)->unique();
-            $table->string('token_prefixo', 12);
-            $table->boolean('ativo')->default(true);
-            $table->timestamp('ultimo_contato_em')->nullable();
-            $table->string('ultimo_ip', 45)->nullable();
+            $table->string('localizacao', 150);
+            $table->string('descricao', 500)->nullable();
+            $table->enum('status', ['online', 'offline', 'manutencao'])->default('offline');
+            $table->timestamp('ultimo_sinal')->nullable();
+            $table->string('ip_ultimo', 45)->nullable();
             $table->string('versao', 30)->nullable();
+            $table->string('token_hash', 64)->unique();
             $table->timestamps();
         });
     }

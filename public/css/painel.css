@@ -1723,3 +1723,337 @@ details summary {
     font-size: 0.88rem;
     margin: 4px 0 14px;
 }
+/* ===== Configurações ===== */
+.form-admin .campo input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    font: inherit;
+    font-size: 1rem;
+    background: #fff;
+    border: 2px solid var(--cinza-claro);
+    border-radius: 10px;
+}
+.form-admin .campo input[type="password"]:focus {
+    outline: none;
+    border-color: var(--verde-medio);
+}
+.config-bloco {
+    max-width: 720px;
+}
+.zona-perigo {
+    border: 1px solid #f1c0ba;
+}
+.zona-perigo h3 {
+    color: var(--erro);
+}
+.campo-leitura {
+    padding: 12px 14px;
+    background: #eef4f4;
+    border-radius: 10px;
+    color: #3a4a4c;
+}
+
+.temas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 6px;
+}
+@media (max-width: 560px) {
+    .temas {
+        grid-template-columns: 1fr;
+    }
+}
+.tema-opcao {
+    position: relative;
+}
+.tema-opcao input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+.tema-opcao span {
+    display: block;
+    padding: 14px 16px;
+    border: 2px solid var(--cinza-claro);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.tema-opcao span small {
+    display: block;
+    font-weight: 400;
+    color: #6a7a7c;
+    margin-top: 2px;
+}
+.tema-opcao input:checked + span {
+    border-color: var(--verde-medio);
+    background: #e3f4f2;
+}
+.tema-opcao input:focus-visible + span {
+    outline: 3px solid var(--ciano);
+}
+
+/* ===== Modo escuro (camada de ajustes: deve ficar no fim do arquivo) ===== */
+html[data-tema="escuro"] {
+    color-scheme: dark;
+    --fundo: #0e1719;
+    --texto: #e3eeef;
+    --cinza-claro: #2d4448;
+    --sup: #162427;
+    --sup2: #1c2f32;
+    --linha: #263c40;
+    --suave: #9fb4b7;
+    --titulo: #5fd9cb;
+}
+html[data-tema="escuro"] body {
+    background: var(--fundo);
+    color: var(--texto);
+}
+
+/* Superfícies */
+html[data-tema="escuro"]
+    :is(
+        .cartao,
+        .metrica,
+        .kpi,
+        .vazio,
+        .tabela-wrap,
+        .abas,
+        .card-paciente,
+        .sintoma-item,
+        .rosca-centro
+    ) {
+    background: var(--sup);
+}
+html[data-tema="escuro"]
+    :is(
+        .card-resumo,
+        .vitais div,
+        .ia-caixa,
+        .comentario,
+        .sintoma-item.inativo,
+        .badge,
+        .campo-leitura
+    ) {
+    background: var(--sup2);
+}
+html[data-tema="escuro"]
+    :is(
+        .busca,
+        .campo-busca input,
+        .area-texto,
+        .campo-filtro select,
+        .campo-filtro input,
+        .form-admin .campo input,
+        .form-admin .campo select,
+        .form-admin .campo textarea,
+        .aba-status,
+        .btn.claro,
+        .btn-ver,
+        .pg
+    ) {
+    background: var(--sup2);
+    color: var(--texto);
+    border-color: var(--linha);
+}
+html[data-tema="escuro"] .form-admin .campo select:disabled {
+    opacity: 0.6;
+}
+html[data-tema="escuro"] ::placeholder {
+    color: #7a9195;
+}
+
+/* Bordas e divisórias */
+html[data-tema="escuro"]
+    :is(
+        .tabela td,
+        .item-atencao,
+        .item-log,
+        .status-linha,
+        .sintoma-corpo,
+        .card-paciente,
+        .sintoma-item,
+        .tema-opcao span
+    ) {
+    border-color: var(--linha);
+}
+html[data-tema="escuro"] .card-paciente.com-alerta {
+    border-color: var(--erro);
+}
+html[data-tema="escuro"] .zona-perigo {
+    border-color: #6b2c27;
+}
+
+/* Textos */
+html[data-tema="escuro"]
+    :is(
+        h1.titulo,
+        .titulo-secao,
+        .cartao h3,
+        .cat-topo h3,
+        .kpi b,
+        .metrica b,
+        .rosca-centro b,
+        .mini-link,
+        .vazio a
+    ) {
+    color: var(--titulo);
+}
+html[data-tema="escuro"] .zona-perigo h3 {
+    color: #f28b82;
+}
+html[data-tema="escuro"]
+    :is(
+        .sub,
+        .kpi span,
+        .metrica span,
+        .kpi small,
+        .tabela th,
+        .tabela small,
+        .card-sub,
+        .aviso,
+        .atualizado,
+        .sem-dados,
+        .resultado-info,
+        .dica,
+        .campo-filtro > label,
+        .check-simples,
+        .abas a,
+        .card-rodape,
+        .item-atencao small,
+        .item-log small,
+        .comentario-topo,
+        .origem,
+        .delta,
+        .detalhe,
+        .filtro-gravidade .rotulo,
+        .vitais span,
+        .dados dt,
+        .vazio,
+        .cat-topo .meta,
+        .tema-opcao span small,
+        .rosca-centro span
+    ) {
+    color: var(--suave);
+}
+html[data-tema="escuro"] .kpi.bom b {
+    color: #4cc17b;
+}
+html[data-tema="escuro"] .kpi.atencao b {
+    color: #e5b800;
+}
+html[data-tema="escuro"] .kpi.ruim b {
+    color: #f28b82;
+}
+html[data-tema="escuro"] :is(.atrasado, .campo .erro, .erro-campo) {
+    color: #f28b82;
+}
+html[data-tema="escuro"] .valor-svg {
+    fill: var(--titulo);
+}
+html[data-tema="escuro"] .rotulo-svg {
+    fill: var(--suave);
+}
+html[data-tema="escuro"] .eixo-svg {
+    stroke: var(--linha);
+}
+
+/* Trilhos de barra e linhas de tabela */
+html[data-tema="escuro"] :is(.trilho, .barra-espera) {
+    background: #2a3f42;
+}
+html[data-tema="escuro"] .tabela tr.linha-alerta {
+    background: #2b1c1c;
+}
+
+/* Estados e etiquetas */
+html[data-tema="escuro"] .status-aguardando {
+    background: #1e3033;
+    color: #b7c9cb;
+}
+html[data-tema="escuro"] .status-em_atendimento {
+    background: #15294a;
+    color: #8fb8f5;
+}
+html[data-tema="escuro"] .status-finalizada {
+    background: #15321f;
+    color: #7fd6a1;
+}
+html[data-tema="escuro"] .tag-inativo {
+    background: #3a1b18;
+    color: #f28b82;
+}
+
+/* Avisos */
+html[data-tema="escuro"] .flash.ok {
+    background: #15321f;
+    color: #7fd6a1;
+}
+html[data-tema="escuro"] .flash.erro {
+    background: #3a1b18;
+    color: #f28b82;
+}
+html[data-tema="escuro"] :is(.banner-alerta.critico, .alerta-imediato) {
+    background: #3a1b18;
+    color: #f28b82;
+    border-color: var(--erro);
+}
+html[data-tema="escuro"]
+    :is(.banner-alerta.aviso-amarelo, .offline, .caixa-senha) {
+    background: #3a3512;
+    color: #e8d46a;
+    border-color: #8a7000;
+}
+html[data-tema="escuro"] .caixa-senha code {
+    background: var(--fundo);
+    color: var(--texto);
+}
+html[data-tema="escuro"] .nivel.WARNING {
+    background: #3a3512;
+    color: #e8d46a;
+}
+html[data-tema="escuro"]
+    :is(.nivel.ERROR, .nivel.CRITICAL, .nivel.ALERT, .nivel.EMERGENCY) {
+    background: #3a1b18;
+    color: #f28b82;
+}
+
+/* Selos de gravidade */
+html[data-tema="escuro"] .tom-laranja {
+    --bg: #3a2a18;
+    --borda: #6b4a22;
+    --cor-texto: #f8b878;
+}
+html[data-tema="escuro"] .tom-amarelo {
+    --bg: #3a3512;
+    --borda: #6b6220;
+    --cor-texto: #e8d46a;
+}
+html[data-tema="escuro"] .tom-verde {
+    --bg: #15321f;
+    --borda: #265a3a;
+    --cor-texto: #7fd6a1;
+}
+html[data-tema="escuro"] .tom-azul {
+    --bg: #15294a;
+    --borda: #284b84;
+    --cor-texto: #8fb8f5;
+}
+html[data-tema="escuro"] .tom-todas {
+    --bg: #1c2f32;
+    --borda: #2d4448;
+    --cor-texto: #b7c9cb;
+    --ponto: #8aa0a3;
+}
+
+/* Itens ativos (precisam vencer as regras acima) */
+html[data-tema="escuro"] :is(.abas a.ativa, .aba-status.ativa, .pg.ativa) {
+    background: var(--verde-medio);
+    border-color: var(--verde-medio);
+    color: #fff;
+}
+html[data-tema="escuro"] .tema-opcao input:checked + span {
+    background: #14403f;
+    border-color: var(--verde-medio);
+}

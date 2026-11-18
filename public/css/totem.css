@@ -51,6 +51,7 @@ body {
 }
 
 .cartao {
+    position:center;
     background: #fff;
     width: 100%;
     max-width: 720px;
@@ -264,117 +265,226 @@ h1 {
 
 /* ===== Questionário ===== */
 .categoria {
-  border: 2px solid var(--cinza-claro);
-  border-radius: 16px;
-  margin-bottom: 12px;
-  overflow: hidden;
+    border: 2px solid var(--cinza-claro);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
 }
 .categoria summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 16px 18px;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--verde-escuro);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 18px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
-.categoria summary::-webkit-details-marker { display: none; }
-.categoria summary::after { content: "▾"; margin-left: auto; transition: transform .2s; }
-.categoria[open] summary::after { transform: rotate(180deg); }
-.categoria[open] { border-color: var(--verde-medio); }
+.categoria summary::-webkit-details-marker {
+    display: none;
+}
+.categoria summary::after {
+    content: "▾";
+    margin-left: auto;
+    transition: transform 0.2s;
+}
+.categoria[open] summary::after {
+    transform: rotate(180deg);
+}
+.categoria[open] {
+    border-color: var(--verde-medio);
+}
 .categoria .contagem {
-  background: var(--ciano);
-  color: var(--verde-mais-escuro);
-  font-size: .85rem;
-  font-weight: 700;
-  min-width: 26px;
-  height: 26px;
-  border-radius: 13px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
+    background: var(--ciano);
+    color: var(--verde-mais-escuro);
+    font-size: 0.85rem;
+    font-weight: 700;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 13px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
 }
-.categoria .contagem.visivel { display: inline-flex; }
+.categoria .contagem.visivel {
+    display: inline-flex;
+}
 
-.sintomas-lista { display: flex; flex-wrap: wrap; gap: 10px; padding: 4px 18px 18px; }
-.chip { position: relative; }
-.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.sintomas-lista {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 4px 18px 18px;
+}
+.chip {
+    position: relative;
+}
+.chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
 .chip span {
-  display: block;
-  padding: 12px 18px;
-  border: 2px solid var(--cinza-claro);
-  border-radius: 999px;
-  font-size: 1.05rem;
-  cursor: pointer;
-  user-select: none;
+    display: block;
+    padding: 12px 18px;
+    border: 2px solid var(--cinza-claro);
+    border-radius: 999px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    user-select: none;
 }
 .chip input:checked + span {
-  background: var(--verde-escuro);
-  border-color: var(--verde-escuro);
-  color: #fff;
+    background: var(--verde-escuro);
+    border-color: var(--verde-escuro);
+    color: #fff;
 }
-.chip input:focus-visible + span { outline: 3px solid var(--ciano); }
+.chip input:focus-visible + span {
+    outline: 3px solid var(--ciano);
+}
 
 .erro-geral {
-  background: #FDECEA;
-  color: var(--erro);
-  padding: 12px 16px;
-  border-radius: 10px;
-  margin-bottom: 16px;
+    background: #fdecea;
+    color: var(--erro);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
 }
 
 /* ===== Perguntas (uma por tela) ===== */
-.progresso { height: 8px; background: var(--cinza-claro); border-radius: 4px; margin-bottom: 8px; overflow: hidden; }
-.progresso div { height: 100%; width: 0; background: var(--verde-medio); transition: width .25s; }
-.contador { text-align: right; font-size: .9rem; color: #4a5a5c; margin-bottom: 20px; }
+.progresso {
+    height: 8px;
+    background: var(--cinza-claro);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+.progresso div {
+    height: 100%;
+    width: 0;
+    background: var(--verde-medio);
+    transition: width 0.25s;
+}
+.contador {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #4a5a5c;
+    margin-bottom: 20px;
+}
 .tag-sintoma {
-  display: inline-block;
-  background: var(--cinza-claro);
-  color: var(--verde-escuro);
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: .9rem;
-  font-weight: 600;
-  margin-bottom: 12px;
+    display: inline-block;
+    background: var(--cinza-claro);
+    color: var(--verde-escuro);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 12px;
 }
-#texto { font-size: 1.6rem; margin-bottom: 24px; }
-.respostas-grandes { display: flex; gap: 12px; margin-bottom: 20px; }
+#texto {
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+}
+.respostas-grandes {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
 .resposta {
-  flex: 1;
-  padding: 26px 10px;
-  font-size: 1.35rem;
-  font-weight: 700;
-  border: 2px solid var(--cinza-claro);
-  background: #fff;
-  color: var(--verde-escuro);
-  border-radius: 16px;
-  cursor: pointer;
+    flex: 1;
+    padding: 26px 10px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    border: 2px solid var(--cinza-claro);
+    background: #fff;
+    color: var(--verde-escuro);
+    border-radius: 16px;
+    cursor: pointer;
 }
-.resposta:hover { border-color: var(--verde-medio); }
-.resposta.escolhida { background: var(--verde-escuro); border-color: var(--verde-escuro); color: #fff; }
+.resposta:hover {
+    border-color: var(--verde-medio);
+}
+.resposta.escolhida {
+    background: var(--verde-escuro);
+    border-color: var(--verde-escuro);
+    color: #fff;
+}
 
 /* ===== Resultado ===== */
-.resultado { text-align: center; }
+.resultado {
+    text-align: center;
+}
 .selo {
-  width: 150px; height: 150px;
-  border-radius: 50%;
-  margin: 8px auto 20px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; font-weight: 800; color: #fff;
-  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin: 8px auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
-.cor-laranja .selo { background: #F28C28; }
-.cor-amarelo .selo { background: #E5B800; color: #3b2f00; }
-.cor-verde   .selo { background: #2E9E55; }
-.cor-azul    .selo { background: #2F80ED; }
-.ficha { color: #4a5a5c; margin-bottom: 4px; }
-.tempo { font-size: 1.3rem; font-weight: 600; color: var(--verde-escuro); margin: 8px 0 20px; }
+.cor-laranja .selo {
+    background: #f28c28;
+}
+.cor-amarelo .selo {
+    background: #e5b800;
+    color: #3b2f00;
+}
+.cor-verde .selo {
+    background: #2e9e55;
+}
+.cor-azul .selo {
+    background: #2f80ed;
+}
+.ficha {
+    color: #4a5a5c;
+    margin-bottom: 4px;
+}
+.tempo {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    margin: 8px 0 20px;
+}
 .alerta-imediato {
-  background: #FDECEA; border: 2px solid var(--erro); color: var(--erro);
-  font-weight: 700; padding: 14px; border-radius: 12px; margin-bottom: 20px;
+    background: #fdecea;
+    border: 2px solid var(--erro);
+    color: var(--erro);
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
-.orientacoes { text-align: left; background: #F2F8F8; border-radius: 12px; padding: 14px 18px; margin: 20px 0; font-size: .95rem; color: #3a4a4c; }
-.orientacoes li { margin-bottom: 6px; }
+.orientacoes {
+    text-align: left;
+    background: #f2f8f8;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-size: 0.95rem;
+    color: #3a4a4c;
+}
+.orientacoes li {
+    margin-bottom: 6px;
+}
+/* ===== Entrada ===== */
+.acoes-inicio {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.link-simples {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    color: var(--verde-escuro);
+    font-weight: 600;
+}
+.espaco-topo {
+    margin-top: 12px;
+}

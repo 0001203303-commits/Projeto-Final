@@ -6,40 +6,50 @@ use App\Http\Controllers\Controller;
 use App\Models\Totem;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Models\Configuracao;
 
 class TotemController extends Controller
 {
-        public function index()
+    private const STATUS = ['online', 'offline', 'manutencao'];
+
+    public function index()
     {
         $this->marcarOffline();
 
-        // ... o restante continua igual
+        return view('painel.totens.index', $this->dados());
     }
 
+    /** Só a lista, para a atualização automática. */
     public function parcial()
     {
         $this->marcarOffline();
 
-        // ... o restante continua igual
+        return view('painel.totens._lista', $this->dados());
     }
-public function create()
+
+    public function create()
     {
-        return view('painel.totens.form', ['totem' => new Totem]);
+        return view('painel.totens.form', ['totem' => new Totem(['status' => 'offline'])]);
     }
 
     public function store(Request $request)
     {
-        $dados = $this->validar($request);
+        $dados = $request->validate($this->regras(), $this->mensagens());
+
+        $token = Totem::gerarToken();
 
         $totem = new Totem($dados);
-        $totem->ativo = true;
-        $token = $totem->gerarToken();
+        $totem->token_hash = Totem::hashDoToken($token);
+
+        if ($totem->status === 'online') {
+            $totem->ultimo_sinal = now();
+        }
+
         $totem->save();
 
-        return redirect()->route('painel.totens.index')
-            ->with('ok', 'Totem cadastrado.')
-            ->with('token_totem', ['nome' => $totem->nome, 'token' => $token]);
+        return redirect()
+            ->route('painel.totens.edit', $totem)
+            ->with('ok', 'Totem cadastrado com sucesso.')
+            ->with('novo_token', $token);
     }
 
     public function edit(Totem $totem)
@@ -49,71 +59,104 @@ public function create()
 
     public function update(Request $request, Totem $totem)
     {
-        $totem->update($this->validar($request, $totem));
+        $dados = $request->validate($this->regras($totem), $this->mensagens());
+
+        $totem->fill($dados);
+
+        // Mesma regra do seletor: colocar manualmente em "online" registra um sinal
+        if ($totem->isDirty('status') && $totem->status === 'online') {
+            $totem->ultimo_sinal = now();
+        }
+
+        $totem->save();
 
         return redirect()->route('painel.totens.index')->with('ok', 'Totem atualizado.');
     }
 
-    public function novoToken(Totem $totem)
+    /** Seletor de status do cartão. */
+    public function atualizarStatus(Request $request, Totem $totem)
     {
-        $token = $totem->gerarToken();
+        $dados = $request->validate([
+            'status' => ['required', Rule::in(self::STATUS)],
+        ]);
+
+        $totem->status = $dados['status'];
+
+        if ($dados['status'] === 'online') {
+            $totem->ultimo_sinal = now();
+        }
+
         $totem->save();
 
-        return redirect()->route('painel.totens.index')
-            ->with('ok', 'Novo token gerado. O token anterior deixou de funcionar.')
-            ->with('token_totem', ['nome' => $totem->nome, 'token' => $token]);
+        return back()->with('ok', "Status de “{$totem->nome}” alterado.");
     }
 
-    public function alternar(Totem $totem)
+    public function regenerarToken(Totem $totem)
     {
-        $totem->update(['ativo' => ! $totem->ativo]);
+        $token = Totem::gerarToken();
 
-        return back()->with('ok', $totem->ativo ? 'Totem reativado.' : 'Totem desativado. Ele não consegue mais se comunicar com o sistema.');
+        $totem->token_hash = Totem::hashDoToken($token);
+        $totem->save();
+
+        return redirect()
+            ->route('painel.totens.edit', $totem)
+            ->with('ok', 'Novo token gerado. O anterior deixou de funcionar.')
+            ->with('novo_token', $token);
     }
 
     public function destroy(Totem $totem)
     {
+        $nome = $totem->nome;
         $totem->delete();
 
-        return back()->with('ok', 'Totem excluído.');
+        return redirect()->route('painel.totens.index')->with('ok', "Totem “{$nome}” excluído.");
     }
-
-    
 
     // ------------------------------------------------------------------
 
-    private function validar(Request $request, ?Totem $totem = null): array
-    {
-        return $request->validate([
-            'nome' => ['required', 'string', 'min:3', 'max:100', Rule::unique('totens', 'nome')->ignore($totem?->id)],
-            'local' => ['nullable', 'string', 'max:150'],
-            'observacoes' => ['nullable', 'string', 'max:500'],
-        ], [
-            'nome.required' => 'Informe o nome do totem.',
-            'nome.min' => 'O nome está muito curto.',
-            'nome.unique' => 'Já existe um totem com este nome.',
-            'local.max' => 'O local pode ter no máximo 150 caracteres.',
-            'observacoes.max' => 'As observações podem ter no máximo 500 caracteres.',
-        ]);
-    }
-
     private function dados(): array
     {
-        return ['totens' => Totem::orderByDesc('ativo')->orderBy('nome')->get()];
+        $totens = Totem::orderBy('nome')->get();
+
+        $contagem = [
+            'online' => $totens->where('status', 'online')->count(),
+            'offline' => $totens->where('status', 'offline')->count(),
+            'manutencao' => $totens->where('status', 'manutencao')->count(),
+        ];
+
+        return compact('totens', 'contagem');
     }
 
-        /** Totens "online" sem sinal recente passam a "offline" (sem precisar de agendador). */
+    /** Totens "online" sem sinal recente passam a "offline" (sem precisar de agendador). */
     private function marcarOffline(): void
     {
-        $limite = (int) Configuracao::obter('totem.timeout', (string) config('triagem.totem_timeout', 120));
-
         Totem::where('status', 'online')
-            ->where(function ($q) use ($limite) {
+            ->where(function ($q) {
                 $q->whereNull('ultimo_sinal')
-                  ->orWhere('ultimo_sinal', '<', now()->subSeconds($limite));
+                    ->orWhere('ultimo_sinal', '<', now()->subSeconds(config('triagem.totem_timeout', 120)));
             })
             ->update(['status' => 'offline']);
     }
 
-    
+    private function regras(?Totem $totem = null): array
+    {
+        return [
+            'nome' => ['required', 'string', 'min:3', 'max:100', Rule::unique('totens', 'nome')->ignore($totem?->id)],
+            'localizacao' => ['required', 'string', 'min:3', 'max:150'],
+            'descricao' => ['nullable', 'string', 'max:500'],
+            'status' => ['required', Rule::in(self::STATUS)],
+        ];
+    }
+
+    private function mensagens(): array
+    {
+        return [
+            'nome.required' => 'Informe o nome do totem.',
+            'nome.min' => 'O nome deve ter pelo menos 3 caracteres.',
+            'nome.unique' => 'Já existe um totem com este nome.',
+            'localizacao.required' => 'Informe onde o totem está instalado.',
+            'localizacao.min' => 'A localização deve ter pelo menos 3 caracteres.',
+            'status.*' => 'Escolha um status válido.',
+        ];
+    }
 }

@@ -9,6 +9,9 @@
 
     <h1>Seus dados</h1>
     <p class="sub">Preencha as informações abaixo.</p>
+        <p class="aviso" style="text-align:left;margin:-14px 0 18px">
+        Já se cadastrou antes? <a href="{{ route('triagem.entrar') }}">Entre com seu CPF</a>.
+    </p>
 
     <form method="POST" action="{{ route('triagem.dados.salvar') }}" novalidate>
         @csrf
