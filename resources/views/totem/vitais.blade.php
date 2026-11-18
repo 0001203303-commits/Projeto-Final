@@ -3,102 +3,165 @@
 @section('titulo', 'Sinais vitais')
 
 @section('conteudo')
-    <div class="etapas">
-        <div class="etapa ativa"></div><div class="etapa ativa"></div><div class="etapa"></div>
+<div class="medicao" id="medicao" data-estado="instrucao">
+
+    <ol class="medicao-passos" id="passos" aria-hidden="true"></ol>
+
+    <div class="medicao-palco" aria-live="polite">
+        <div class="medicao-icone" id="icone"></div>
+        <h1 id="titulo"></h1>
+        <p class="sub" id="texto"></p>
+
+        <div class="medicao-barra" id="barra-wrap" hidden>
+            <div class="medicao-barra-fill" id="barra"></div>
+        </div>
+
+        <div class="medicao-valor" id="valor" hidden>
+            <span id="valor-numero"></span>
+            <small id="valor-unidade"></small>
+        </div>
     </div>
 
-    <h1>Sinais vitais</h1>
-    <p class="sub">Olá, {{ \Illuminate\Support\Str::before($triagem->paciente->nome, ' ') }}! Coloque o dedo no oxímetro e aguarde a medição.</p>
+    <p class="aviso">Siga as instruções na tela. Não é preciso tocar em nada.</p>
+</div>
 
-    <div class="simulador-aviso">
-        <strong>Modo simulação:</strong> sem os sensores físicos, ajuste os valores abaixo ou escolha um cenário pronto.
-    </div>
+{{-- Enviado automaticamente ao fim das 4 medições --}}
+<form id="form-vitais" method="POST" action="{{ route('triagem.vitais.salvar') }}" hidden> {{-- <-- CONFIRA --}}
+    @csrf
+    <input type="hidden" name="temperatura" id="in-temperatura"> {{-- <-- CONFIRA os name --}}
+    <input type="hidden" name="spo2" id="in-spo2">
+    <input type="hidden" name="fc" id="in-fc">
+    <input type="hidden" name="pas" id="in-pas">
+    <input type="hidden" name="pad" id="in-pad">
+</form>
 
-    <div class="cenarios">
-        <button type="button" class="cenario" data-v="80,98,120,80,36.5">Normal</button>
-        <button type="button" class="cenario" data-v="100,97,118,76,38.6">Febre</button>
-        <button type="button" class="cenario" data-v="110,88,130,85,36.8">Oxigenação baixa</button>
-        <button type="button" class="cenario" data-v="90,97,180,110,36.6">Pressão alta</button>
-        <button type="button" class="cenario" data-v="105,95,85,55,36.2">Pressão baixa</button>
-        <button type="button" class="cenario" data-v="135,96,125,80,36.7">Coração acelerado</button>
-    </div>
+<script>
+(function () {
+    const T_INSTRUCAO = 5000, T_MEDICAO = 5000, T_CONFIRMA = 3000;
 
-    <form method="POST" action="{{ route('triagem.vitais.salvar') }}" novalidate>
-        @csrf
+    const sorteio = (min, max) => Math.round(Math.random() * (max - min) + min);
 
-        <div class="vital">
-            <div class="vital-topo">
-                <span class="vital-nome">❤️ Batimentos cardíacos</span>
-                <span class="vital-valor"><span id="out-bpm">{{ old('bpm', 80) }}</span><small>bpm</small></span>
-            </div>
-            <input type="range" id="bpm" name="bpm" min="30" max="200" step="1" value="{{ old('bpm', 80) }}">
-            @error('bpm')<div class="erro">{{ $message }}</div>@enderror
-        </div>
+    const svg = (conteudo) =>
+        '<svg viewBox="0 0 64 64" width="96" height="96" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + conteudo + '</svg>';
 
-        <div class="vital">
-            <div class="vital-topo">
-                <span class="vital-nome">🫁 Saturação de oxigênio (SpO₂)</span>
-                <span class="vital-valor"><span id="out-spo2">{{ old('spo2', 98) }}</span><small>%</small></span>
-            </div>
-            <input type="range" id="spo2" name="spo2" min="70" max="100" step="1" value="{{ old('spo2', 98) }}">
-            @error('spo2')<div class="erro">{{ $message }}</div>@enderror
-        </div>
+    const ETAPAS = [
+        {
+            nome: 'Temperatura',
+            titulo: 'Medindo a temperatura',
+            instrucao: 'Aproxime a testa do sensor de temperatura, a cerca de 3 cm, e fique parado.',
+            medindo: 'Medindo a temperatura... fique parado.',
+            icone: svg('<path d="M26 8a6 6 0 0 1 12 0v28a12 12 0 1 1-12 0z"/><line x1="32" y1="22" x2="32" y2="44"/>'),
+            gerar: () => ({ temperatura: (sorteio(361, 372) / 10).toFixed(1) }),
+            mostrar: v => ({ numero: v.temperatura.replace('.', ','), unidade: '°C' }),
+        },
+        {
+            nome: 'Oximetria',
+            titulo: 'Medindo o oxigênio no sangue',
+            instrucao: 'Coloque o dedo indicador dentro do sensor de oximetria e mantenha a mão parada.',
+            medindo: 'Medindo a oxigenação... mantenha o dedo no sensor.',
+            icone: svg('<path d="M22 56V30a4 4 0 0 1 8 0v-8a4 4 0 0 1 8 0v8a4 4 0 0 1 8 0v14c0 8-6 12-12 12H22z"/><circle cx="14" cy="14" r="4"/><line x1="14" y1="20" x2="14" y2="26"/>'),
+            gerar: () => ({ spo2: sorteio(96, 99) }),
+            mostrar: v => ({ numero: v.spo2, unidade: '% SpO₂' }),
+        },
+        {
+            nome: 'Batimento cardíaco',
+            titulo: 'Medindo os batimentos do coração',
+            instrucao: 'Mantenha o dedo no sensor e respire normalmente.',
+            medindo: 'Medindo os batimentos... respire normalmente.',
+            icone: svg('<path d="M32 54S8 40 8 24a12 12 0 0 1 24-4 12 12 0 0 1 24 4c0 16-24 30-24 30z"/><polyline points="14 30 24 30 28 22 34 38 38 30 50 30"/>'),
+            gerar: () => ({ fc: sorteio(60, 90) }),
+            mostrar: v => ({ numero: v.fc, unidade: 'bpm' }),
+        },
+        {
+            nome: 'Pressão arterial',
+            titulo: 'Medindo a pressão arterial',
+            instrucao: 'Coloque o braço no apoio, com a braçadeira na altura do coração. Fique em silêncio.',
+            medindo: 'Medindo a pressão... não se mexa nem fale.',
+            icone: svg('<rect x="10" y="22" width="44" height="20" rx="6"/><path d="M54 32h4a4 4 0 0 1 0 8h-4"/><line x1="22" y1="22" x2="22" y2="42"/><line x1="32" y1="22" x2="32" y2="42"/>'),
+            gerar: () => ({ pas: sorteio(112, 128), pad: sorteio(68, 82) }),
+            mostrar: v => ({ numero: v.pas + '/' + v.pad, unidade: 'mmHg' }),
+        },
+    ];
 
-        <div class="grupo-pa">
-            <div class="vital">
-                <div class="vital-topo">
-                    <span class="vital-nome">🩺 Pressão (máxima)</span>
-                    <span class="vital-valor"><span id="out-pa_sistolica">{{ old('pa_sistolica', 120) }}</span><small>mmHg</small></span>
-                </div>
-                <input type="range" id="pa_sistolica" name="pa_sistolica" min="60" max="240" step="1" value="{{ old('pa_sistolica', 120) }}">
-                @error('pa_sistolica')<div class="erro">{{ $message }}</div>@enderror
-            </div>
+    const $ = id => document.getElementById(id);
+    const raiz = $('medicao');
+    const medidos = {};
+    let enviado = false;
 
-            <div class="vital">
-                <div class="vital-topo">
-                    <span class="vital-nome">🩺 Pressão (mínima)</span>
-                    <span class="vital-valor"><span id="out-pa_diastolica">{{ old('pa_diastolica', 80) }}</span><small>mmHg</small></span>
-                </div>
-                <input type="range" id="pa_diastolica" name="pa_diastolica" min="40" max="140" step="1" value="{{ old('pa_diastolica', 80) }}">
-                @error('pa_diastolica')<div class="erro">{{ $message }}</div>@enderror
-            </div>
-        </div>
+    // Indicador de etapas (só visual)
+    ETAPAS.forEach((e, i) => {
+        const li = document.createElement('li');
+        li.textContent = e.nome;
+        $('passos').appendChild(li);
+    });
+    const marcadores = [...$('passos').children];
 
-        <div class="vital">
-            <div class="vital-topo">
-                <span class="vital-nome">🌡️ Temperatura</span>
-                <span class="vital-valor"><span id="out-temperatura">{{ number_format((float) old('temperatura', 36.5), 1, '.', '') }}</span><small>°C</small></span>
-            </div>
-            <input type="range" id="temperatura" name="temperatura" min="34" max="42" step="0.1" value="{{ old('temperatura', 36.5) }}">
-            @error('temperatura')<div class="erro">{{ $message }}</div>@enderror
-        </div>
+    function estado(nome) {
+        raiz.dataset.estado = nome;
+        $('barra-wrap').hidden = nome !== 'medindo';
+        $('valor').hidden = nome !== 'confirmacao';
+    }
 
-        <div class="botoes">
-            <a href="{{ route('triagem.dados') }}" class="botao secundario">Voltar</a>
-            <button type="submit" class="botao">Continuar</button>
-        </div>
-    </form>
+    function animarBarra(ms) {
+        const b = $('barra');
+        b.style.transition = 'none';
+        b.style.width = '0%';
+        void b.offsetWidth; // reinicia a animação
+        b.style.transition = 'width ' + ms + 'ms linear';
+        b.style.width = '100%';
+    }
 
-    <script>
-        const campos = ['bpm', 'spo2', 'pa_sistolica', 'pa_diastolica', 'temperatura'];
+    function etapa(i) {
+        if (i >= ETAPAS.length) return concluir();
 
-        function atualizar(id) {
-            const el = document.getElementById(id);
-            const out = document.getElementById('out-' + id);
-            out.textContent = id === 'temperatura' ? parseFloat(el.value).toFixed(1) : el.value;
-        }
+        const e = ETAPAS[i];
+        marcadores.forEach((m, k) => m.className = k < i ? 'feito' : (k === i ? 'atual' : ''));
 
-        campos.forEach(id => {
-            document.getElementById(id).addEventListener('input', () => atualizar(id));
-        });
+        // 1) Instrução
+        $('icone').innerHTML = e.icone;
+        $('titulo').textContent = e.nome;
+        $('texto').textContent = e.instrucao;
+        estado('instrucao');
 
-        document.querySelectorAll('.cenario').forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.dataset.v.split(',').forEach((valor, i) => {
-                    document.getElementById(campos[i]).value = valor;
-                    atualizar(campos[i]);
-                });
-            });
-        });
-    </script>
+        setTimeout(() => {
+            // 2) Medição simulada
+            $('titulo').textContent = e.titulo;
+            $('texto').textContent = e.medindo;
+            estado('medindo');
+            animarBarra(T_MEDICAO);
+
+            setTimeout(() => {
+                // 3) Confirmação
+                const v = e.gerar();
+                Object.assign(medidos, v);
+                const m = e.mostrar(v);
+
+                $('titulo').textContent = e.nome + ' medida';
+                $('texto').textContent = 'Medição concluída.';
+                $('valor-numero').textContent = m.numero;
+                $('valor-unidade').textContent = m.unidade;
+                estado('confirmacao');
+
+                setTimeout(() => etapa(i + 1), T_CONFIRMA);
+            }, T_MEDICAO);
+        }, T_INSTRUCAO);
+    }
+
+    function concluir() {
+        if (enviado) return;
+        enviado = true;
+
+        marcadores.forEach(m => m.className = 'feito');
+        $('icone').innerHTML = '<span style="font-size:4.5rem;line-height:1">✓</span>';
+        $('titulo').textContent = 'Medições concluídas!';
+        $('texto').textContent = 'Agora vamos fazer algumas perguntas sobre como você está se sentindo.';
+        estado('fim');
+
+        ['temperatura', 'spo2', 'fc', 'pas', 'pad'].forEach(k => $('in-' + k).value = medidos[k]);
+        setTimeout(() => $('form-vitais').submit(), 1500);
+    }
+
+    etapa(0);
+})();
+</script>
 @endsection
