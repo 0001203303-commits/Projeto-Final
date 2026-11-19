@@ -13,9 +13,18 @@ chown -R www-data:www-data storage bootstrap/cache
 php artisan config:cache
 php artisan view:cache
 
-# Opcional: só roda quando RUN_MIGRATIONS=true no Render
+
+# Opcional: rodam só quando as variáveis estiverem como "true" no Render
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
+fi
+
+if [ "$RUN_SEEDERS" = "true" ]; then
+    php artisan db:seed --force
+fi
+
+if [ "$RUN_DEMO" = "true" ]; then
+    php artisan db:seed --class=TriagensDemoSeeder --force
 fi
 
 exec apache2-foreground
