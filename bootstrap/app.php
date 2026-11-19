@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'perfil' => \App\Http\Middleware\PerfilMiddleware::class,
             'totem.token' => \App\Http\Middleware\AutenticaTotem::class,
+             $middleware->trustProxies(at: '*'),
         ]);
 
         $middleware->redirectUsersTo('/painel');

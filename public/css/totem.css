@@ -657,35 +657,232 @@ h1 {
 }
 
 /* ===== Medição simulada dos sinais vitais ===== */
-.medicao { text-align: center; }
-.medicao-passos { list-style: none; display: flex; gap: 6px; padding: 0; margin: 0 0 22px; justify-content: center; flex-wrap: wrap; }
-.medicao-passos li {
-  font-size: .78rem; font-weight: 600; padding: 6px 12px; border-radius: 999px;
-  background: #EEF4F4; color: #6a7a7c; border: 2px solid transparent;
+.medicao {
+    text-align: center;
 }
-.medicao-passos li.atual { background: #E3F4F2; color: var(--verde-escuro); border-color: var(--verde-medio); }
-.medicao-passos li.feito { background: var(--verde-escuro); color: #fff; }
+.medicao-passos {
+    list-style: none;
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    margin: 0 0 22px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.medicao-passos li {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef4f4;
+    color: #6a7a7c;
+    border: 2px solid transparent;
+}
+.medicao-passos li.atual {
+    background: #e3f4f2;
+    color: var(--verde-escuro);
+    border-color: var(--verde-medio);
+}
+.medicao-passos li.feito {
+    background: var(--verde-escuro);
+    color: #fff;
+}
 
-.medicao-palco { min-height: 330px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.medicao-icone { color: var(--verde-medio); margin-bottom: 8px; }
+.medicao-palco {
+    min-height: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.medicao-icone {
+    color: var(--verde-medio);
+    margin-bottom: 8px;
+}
 
 /* instrução: ícone "respirando" suave */
-.medicao[data-estado="instrucao"] .medicao-icone { animation: respira 2s ease-in-out infinite; }
+.medicao[data-estado="instrucao"] .medicao-icone {
+    animation: respira 2s ease-in-out infinite;
+}
 /* medindo: pulso mais rápido */
-.medicao[data-estado="medindo"] .medicao-icone { animation: pulsa .9s ease-in-out infinite; color: var(--ciano); }
+.medicao[data-estado="medindo"] .medicao-icone {
+    animation: pulsa 0.9s ease-in-out infinite;
+    color: var(--ciano);
+}
 .medicao[data-estado="confirmacao"] .medicao-icone,
-.medicao[data-estado="fim"] .medicao-icone { color: var(--ok, #2E9E55); }
+.medicao[data-estado="fim"] .medicao-icone {
+    color: var(--ok, #2e9e55);
+}
 
-@keyframes respira { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-@keyframes pulsa   { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.12); opacity: .75; } }
+@keyframes respira {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+@keyframes pulsa {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.12);
+        opacity: 0.75;
+    }
+}
 
-.medicao-barra { width: min(420px, 90%); height: 14px; background: #E3EDED; border-radius: 999px; overflow: hidden; margin-top: 12px; }
-.medicao-barra-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--verde-medio), var(--ciano)); border-radius: 999px; }
+.medicao-barra {
+    width: min(420px, 90%);
+    height: 14px;
+    background: #e3eded;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+.medicao-barra-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--verde-medio), var(--ciano));
+    border-radius: 999px;
+}
 
-.medicao-valor { margin-top: 12px; color: var(--verde-escuro); }
-.medicao-valor span { font-size: 3.4rem; font-weight: 800; line-height: 1; }
-.medicao-valor small { display: block; font-size: 1.1rem; color: #6a7a7c; margin-top: 4px; }
+.medicao-valor {
+    margin-top: 12px;
+    color: var(--verde-escuro);
+}
+.medicao-valor span {
+    font-size: 3.4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.medicao-valor small {
+    display: block;
+    font-size: 1.1rem;
+    color: #6a7a7c;
+    margin-top: 4px;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .medicao .medicao-icone { animation: none !important; }
+    .medicao .medicao-icone {
+        animation: none !important;
+    }
+}
+
+/* ===== Medição simulada dos sinais vitais ===== */
+.medicao {
+    text-align: center;
+}
+.medicao-passos {
+    list-style: none;
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    margin: 0 0 22px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.medicao-passos li {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #eef4f4;
+    color: #6a7a7c;
+    border: 2px solid transparent;
+}
+.medicao-passos li.atual {
+    background: #e3f4f2;
+    color: var(--verde-escuro);
+    border-color: var(--verde-medio);
+}
+.medicao-passos li.feito {
+    background: var(--verde-escuro);
+    color: #fff;
+}
+
+.medicao-palco {
+    min-height: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.medicao-icone {
+    color: var(--verde-medio);
+    margin-bottom: 8px;
+}
+.medicao[data-estado="instrucao"] .medicao-icone {
+    animation: respira 2s ease-in-out infinite;
+}
+.medicao[data-estado="medindo"] .medicao-icone {
+    animation: pulsa 0.9s ease-in-out infinite;
+    color: var(--ciano);
+}
+.medicao[data-estado="confirmacao"] .medicao-icone,
+.medicao[data-estado="fim"] .medicao-icone {
+    color: #2e9e55;
+}
+
+@keyframes respira {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+@keyframes pulsa {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.12);
+        opacity: 0.75;
+    }
+}
+
+.medicao-barra {
+    width: min(420px, 90%);
+    height: 14px;
+    background: #e3eded;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+.medicao-barra-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--verde-medio), var(--ciano));
+    border-radius: 999px;
+}
+
+.medicao-valor {
+    margin-top: 12px;
+    color: var(--verde-escuro);
+}
+.medicao-valor span {
+    font-size: 3.4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+.medicao-valor small {
+    display: block;
+    font-size: 1.1rem;
+    color: #6a7a7c;
+    margin-top: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .medicao .medicao-icone {
+        animation: none !important;
+    }
 }

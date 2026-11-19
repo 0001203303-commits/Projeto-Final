@@ -22,6 +22,8 @@ return [
 
     // Sem contato por mais que isso (em segundos), o totem aparece como offline
      'totem_online_segundos' => 120,
+         // simulado = totem "mede" sozinho | manual = sliders e cenários de teste
+    'vitais_modo' => env('TRIAGEM_VITAIS_MODO', 'simulado'),
 
     'cores' => [
         'laranja' => ['nome' => 'Laranja', 'descricao' => 'Muito urgente', 'tempo' => 'até 10 minutos','limite_min' => 10],

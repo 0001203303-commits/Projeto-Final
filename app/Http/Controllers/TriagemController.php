@@ -203,7 +203,7 @@ class TriagemController extends Controller
 
         return $this->abrirTriagem($request, $paciente);
     }
-        public function vitais(Request $request)
+          public function vitais(Request $request)
     {
         $triagem = $this->triagemAtual($request);
 
@@ -211,9 +211,15 @@ class TriagemController extends Controller
             return redirect()->route('triagem.inicio');
         }
 
-        return view('totem.vitais', compact('triagem'));
-    }
+        $modo = config('triagem.vitais_modo', 'simulado');
 
+        // Na simulação, quem já foi "medido" não refaz as 4 etapas (o botão Voltar do navegador, por exemplo)
+        if ($modo === 'simulado' && $triagem->bpm !== null) {
+            return redirect()->route('triagem.sintomas');
+        }
+
+        return view($modo === 'manual' ? 'totem.vitais_manual' : 'totem.vitais', compact('triagem'));
+    }
     public function salvarVitais(Request $request)
     {
         $triagem = $this->triagemAtual($request);
