@@ -15,6 +15,13 @@ php artisan view:cache
 
 
 # Opcional: rodam só quando as variáveis estiverem como "true" no Render
+echo "=== DIAGNOSTICO ==="
+echo "APP_ENV=$APP_ENV"
+echo "MYSQL_ATTR_SSL_CA=$MYSQL_ATTR_SSL_CA"
+ls -l /etc/ssl/certs/ca-certificates.crt || echo "CERTIFICADO AUSENTE"
+php artisan tinker --execute="dump(config('database.connections.mysql.options'));" || true
+echo "==================="
+
 if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force
 fi
